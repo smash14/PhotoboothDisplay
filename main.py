@@ -1,15 +1,13 @@
 import os
-import time, threading
-import hashlib
 from tkinter import *
-import requests # to get image from the web
-import shutil # to save it locally
 from PIL import Image, ImageTk, ImageOps
-import shutil
 from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
 
 picture_list = []
+image_collage_4x4 = Image
+image_collage_single = Image
+image_printer = Image
 
 
 def update_picture_list():
@@ -19,25 +17,31 @@ def update_picture_list():
         return True
     return False
 
+
 def check_and_redraw_display():
+    global image_collage_4x4  # TODO Images of TKinter needs to be global to prevent garbage collector?!
+    global image_collage_single
+
     def open_popup():
-        logo_path = os.path.join("images", "print.gif")
-        logo = PhotoImage(file=logo_path)
+        global img_printer
+        img_printer = Image.open(os.path.join("images", "print.jpg"))
+        img_printer = ImageOps.fit(img_printer, (800, 600))
+        img_printer = ImageTk.PhotoImage(img_printer)
         top = Toplevel(window)
         top.title("Wird gedruckt...")
         # calculate position x and y coordinates
         width = 800
-        height = 800
+        height = 600
         x = (screen_width / 2) - (width / 2)
         y = (screen_height / 2) - (height / 2)
         top.geometry('%dx%d+%d+%d' % (width, height, x, y))
         top.overrideredirect(True)  # no window manager decorations
-        Label(top, text="Wird gedruckt", font=('Helvetica 14 bold')).grid(row=0, column=0)
-        Label(top, image=logo).grid(row=1, column=0)
-        #window.mainloop()
+        Label(top, text="Wird gedruckt...", font=('Helvetica 26 bold')).pack(pady=10)
+        Label(top, image=img_printer).pack(pady=20)
         def close_after_2s():
             top.destroy()
         window.after(2000, close_after_2s)
+        window.update()
 
     def button_print_collage_4x4_clicked():
         print("Button print collage 4x4 clicked")
@@ -92,9 +96,7 @@ def check_and_redraw_display():
         button_print_collage_single = Button(master=window, text='+', width='100', height='5', bg='#00008B',
                                              command=button_print_collage_single_clicked)
         button_print_collage_single.grid(row=1, column=1)
-        #window.update()
-    #window.update()
-    window.mainloop()
+    window.update()
 
 def button_print_collage_single_clicked():
     print("Button print collage single clicked")
@@ -108,4 +110,4 @@ if __name__ == '__main__':
 
     photobooth = ConnectPhotobooth("localhost", "http://127.0.0.1/photobooth/pic.jpg")
     check_and_redraw_display()
-    #window.mainloop()
+    window.mainloop()
