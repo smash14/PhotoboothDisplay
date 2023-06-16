@@ -3,6 +3,13 @@ import os
 import shutil
 import keyboard
 
+"""
+Script to create a file named "pic.jpg" each time the ENTER key is pressed on the keyboard.
+Use this to mock a Photobox to manually create new pictures.
+
+An executable is available in the "bin" folder
+"""
+
 # List of file names to iterate through
 file_list = ['pic1.jpg', 'pic2.jpg', 'pic3.jpg', 'pic4.jpg', 'pic5.jpg', 'pic6.jpg']
 

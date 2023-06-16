@@ -121,6 +121,8 @@ if __name__ == '__main__':
     window.attributes("-fullscreen", True)
     window.bind("<Escape>", lambda event: window.quit())
 
+    # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
+    # Use "createPicture.exe" located in the bin folder to create new pictures.
     photobooth = ConnectPhotobooth("localhost", "http://127.0.0.1/photobooth/pic.jpg")  # TODO: Replace with actual URL of Photobooth
     check_and_redraw_display()
     window.mainloop()
