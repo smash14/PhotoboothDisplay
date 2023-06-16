@@ -4,3 +4,4 @@ win32printing
 pynput~=1.7.6
 requests~=2.31.0
 keyboard~=0.13.5
+pyinstaller
