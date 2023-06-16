@@ -161,3 +161,6 @@ cython_debug/
 
 # Project Specific
 photos/
+images/_collage1x1.jpg
+images/_collage2x2.jpg
+tmp/
