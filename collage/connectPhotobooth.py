@@ -7,7 +7,18 @@ import hashlib
 
 
 class ConnectPhotobooth:
+    """
+    Class to Connect with a Photobox WiFi Network
+    """
     def __init__(self, ssid, image_url):
+        """
+        Parameters
+        __________
+        ssid : str
+            SSID of Photbox WiFi network. Use "localhost" to mock for example a XAMPP instance
+        image_url : str
+            URL where to find the current picture in jpg format
+        """
         self.ssid = ssid
         self.image_url = image_url
 
