@@ -1,3 +1,4 @@
+import sys
 import os.path
 from PIL import Image, ImageOps
 
@@ -17,6 +18,17 @@ class Collage:
         self.margin_width = int(self.width * self.margin_border / 100)
         self.margin_height = int(self.height * self.margin_border / 100)
         self.margin_bottom = int(self.height * self.margin_bottom / 100)
+
+    @staticmethod
+    def _resource_path(relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
 
     def _open_or_create_background_image(self):
         if os.path.isfile(self.background_path):
@@ -82,4 +94,5 @@ class Collage:
         self.background.show()
 
     def save_collage(self, file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         self.background.save(file_path, quality=95)

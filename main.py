@@ -4,6 +4,7 @@ from PIL import Image, ImageTk, ImageOps
 from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
 from collage.printerCollage import PrinterCollage
+from utils import resource_path
 
 # Global picture list with references to all photobooth pictures
 picture_list = []
@@ -11,7 +12,7 @@ picture_list = []
 # Global variables to use with TKinter images
 image_collage_2x2 = Image
 image_collage_single = Image
-image_printer = Image
+img_printer = Image
 
 """
 Append Picture List with new pictures taken from photobox
@@ -33,7 +34,7 @@ def check_and_redraw_display():
     # Popup to show printing process for a few seconds
     def open_popup():
         global img_printer
-        img_printer = Image.open(os.path.join("images", "print.jpg"))
+        img_printer = Image.open(resource_path(os.path.join("images", "print.jpg")))
         img_printer = ImageOps.fit(img_printer, (800, 600))
         img_printer = ImageTk.PhotoImage(img_printer)
         top = Toplevel(window)
@@ -54,7 +55,7 @@ def check_and_redraw_display():
 
     def button_print_collage_2x2_clicked():
         print("Button print collage 2x2 clicked")
-        printer.print_image("images/_collage2x2.jpg")
+        printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         button_print_collage_2x2["state"] = "disable"
         open_popup()
         def enable_button_2x2_5s():
@@ -63,7 +64,7 @@ def check_and_redraw_display():
 
     def button_print_collage_1x1_clicked():
         print("Button print collage 1x1 clicked")
-        printer.print_image("images/_collage1x1.jpg")
+        printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         button_print_collage_1x1["state"] = "disable"
         open_popup()
         def enable_button_1x1_5s():
@@ -74,12 +75,12 @@ def check_and_redraw_display():
         # Create new 1x1 collage picture
         collage_1x1 = Collage(picture_list)
         collage_1x1.create_collage_1x1()
-        collage_1x1.save_collage("images/_collage1x1.jpg")
+        collage_1x1.save_collage(resource_path(os.path.join("images", "_collage1x1.jpg")))
 
         # Create new 2x2 collage picture
         collage_2x2 = Collage(picture_list)
         collage_2x2.create_collage_2x2()
-        collage_2x2.save_collage("images/_collage2x2.jpg")
+        collage_2x2.save_collage(resource_path(os.path.join("images", "_collage2x2.jpg")))
 
         # Get the current screen width and height
         screen_width = window.winfo_screenwidth()
@@ -88,14 +89,14 @@ def check_and_redraw_display():
         picture_width = int(screen_width / 2 - padding * 2)
 
         # Create an object of tkinter ImageTk for Collage 2x2
-        image_collage_2x2 = Image.open("images/_collage2x2.jpg")
+        image_collage_2x2 = Image.open(resource_path(os.path.join("images", "_collage2x2.jpg")))
         wpercent = (picture_width / float(image_collage_2x2.size[0]))
         hsize = int((float(image_collage_2x2.size[1]) * float(wpercent)))
         image_collage_2x2 = image_collage_2x2.resize((picture_width, hsize), Image.LANCZOS)
         image_collage_2x2 = ImageTk.PhotoImage(image_collage_2x2)
 
         # Create an object of tkinter ImageTk for Collage 1x1
-        image_collage_single = Image.open("images/_collage1x1.jpg")
+        image_collage_single = Image.open(resource_path(os.path.join("images", "_collage1x1.jpg")))
         wpercent = (picture_width / float(image_collage_single.size[0]))
         hsize = int((float(image_collage_single.size[1]) * float(wpercent)))
         image_collage_single = image_collage_single.resize((picture_width, hsize), Image.LANCZOS)

@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import requests
 import shutil
@@ -24,10 +25,32 @@ class ConnectPhotobooth:
 
         self.connection_established = False
         self.picture_list = []
-        self.tmp_pic_path = os.path.join("tmp", "pic.jpg")
+
+        self.tmp_pic_path = self.resource_path(os.path.join("tmp", "pic.jpg"))
 
         if not self._check_wlan_connection():
             raise Exception(f"Error: WiFi of Photobooth is not connected ({self.ssid})")
+
+    @staticmethod
+    def resource_path(relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+
+    @staticmethod
+    def _check_for_pyinstaller():
+        # If the application is run as a bundle, the PyInstaller bootloader
+        # extends the sys module by a flag frozen=True and sets the app
+        # path into variable _MEIPASS'.
+        if getattr(sys, 'frozen', False):
+            return False
+        else:
+            return True
 
     # function to establish a new connection
     def _check_wlan_connection(self, timeout=100):
@@ -87,7 +110,7 @@ class ConnectPhotobooth:
             if curr_hash != prev_hash:
                 current_time = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                 target_filename = f"{current_time}.jpg"
-                target_filepath = os.path.join("photos", target_filename)
+                target_filepath = self.resource_path(os.path.join("photos", target_filename))
                 os.makedirs(os.path.dirname(target_filepath), exist_ok=True)
                 shutil.copyfile(self.tmp_pic_path, target_filepath)
                 self.picture_list.append(target_filepath)
