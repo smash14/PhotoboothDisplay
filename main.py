@@ -3,6 +3,7 @@ from tkinter import *
 from PIL import Image, ImageTk, ImageOps
 from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
+from collage.printerCollage import PrinterCollage
 
 # Global picture list with references to all photobooth pictures
 picture_list = []
@@ -52,7 +53,8 @@ def check_and_redraw_display():
         window.update()
 
     def button_print_collage_2x2_clicked():
-        print("Button print collage 4x4 clicked")
+        print("Button print collage 2x2 clicked")
+        printer.print_image("images/_collage2x2.jpg")
         button_print_collage_2x2["state"] = "disable"
         open_popup()
         def enable_button_5s():
@@ -124,5 +126,6 @@ if __name__ == '__main__':
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
     photobooth = ConnectPhotobooth("localhost", "http://127.0.0.1/photobooth/pic.jpg")  # TODO: Replace with actual URL of Photobooth
+    printer = PrinterCollage("Microsoft Print to PDF") # TODO: Replace with actual printer name
     check_and_redraw_display()
     window.mainloop()
