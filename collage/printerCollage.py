@@ -50,9 +50,9 @@ class PrinterCollage:
         if self.printer_name.lower() == "default":
             self.selected_printer = win32print.GetDefaultPrinter()
             return True
-        for printer in local_printers:
-            if self.printer_name in printer:
-                self.selected_printer = printer[2]
+        for local_printer in local_printers:
+            if self.printer_name in local_printer:
+                self.selected_printer = local_printer[2]
                 return True
         return False
 

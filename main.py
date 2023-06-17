@@ -57,9 +57,18 @@ def check_and_redraw_display():
         printer.print_image("images/_collage2x2.jpg")
         button_print_collage_2x2["state"] = "disable"
         open_popup()
-        def enable_button_5s():
+        def enable_button_2x2_5s():
             button_print_collage_2x2["state"] = "normal"
-        window.after(5000, enable_button_5s)
+        window.after(5000, enable_button_2x2_5s)
+
+    def button_print_collage_1x1_clicked():
+        print("Button print collage 1x1 clicked")
+        printer.print_image("images/_collage1x1.jpg")
+        button_print_collage_1x1["state"] = "disable"
+        open_popup()
+        def enable_button_1x1_5s():
+            button_print_collage_1x1["state"] = "normal"
+        window.after(5000, enable_button_1x1_5s)
 
     if update_picture_list():
         # Create new 1x1 collage picture
@@ -105,16 +114,13 @@ def check_and_redraw_display():
                                           command=button_print_collage_2x2_clicked)
         button_print_collage_2x2.grid(row=1, column=0)
 
-        button_print_collage_single = Button(master=window, text='Bild ausdrucken', width='100', height='5', bg='#CCCCCC',
+        button_print_collage_1x1 = Button(master=window, text='Bild ausdrucken', width='100', height='5', bg='#CCCCCC',
                                              command=button_print_collage_1x1_clicked)
-        button_print_collage_single.grid(row=1, column=1)
+        button_print_collage_1x1.grid(row=1, column=1)
 
     # check for new pictures every 2 seconds
     window.after(2000, check_and_redraw_display)
     window.update()
-
-def button_print_collage_1x1_clicked():
-    print("Button print collage single clicked")
 
 
 if __name__ == '__main__':
@@ -126,6 +132,6 @@ if __name__ == '__main__':
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
     photobooth = ConnectPhotobooth("localhost", "http://127.0.0.1/photobooth/pic.jpg")  # TODO: Replace with actual URL of Photobooth
-    printer = PrinterCollage("Microsoft Print to PDF") # TODO: Replace with actual printer name
+    printer = PrinterCollage("Microsoft Print to PDF") # TODO: Replace with actual printer name e.g. Canon SELPHY CP1500
     check_and_redraw_display()
     window.mainloop()

@@ -26,6 +26,9 @@ class ConnectPhotobooth:
         self.picture_list = []
         self.tmp_pic_path = os.path.join("tmp", "pic.jpg")
 
+        if not self._check_wlan_connection():
+            raise Exception(f"Error: WiFi of Photobooth is not connected ({self.ssid})")
+
     # function to establish a new connection
     def _check_wlan_connection(self, timeout=100):
         count = 0
@@ -60,10 +63,10 @@ class ConnectPhotobooth:
                     os.makedirs(os.path.dirname(self.tmp_pic_path), exist_ok=True)
                     with open(self.tmp_pic_path, 'wb') as f:
                         shutil.copyfileobj(r.raw, f)
-                    print('Image successfully Downloaded: ', self.tmp_pic_path)
+                    print('Image successfully downloaded: ', self.tmp_pic_path)
                     return True
                 else:
-                    print('Image Couldn\'t be retreived')
+                    print('Image could not be retrieved')
                     return False
             except:
                 print(f"Failed to establish a new connection to {self.image_url}")
