@@ -5,6 +5,7 @@ import os
 import win32print
 import win32ui
 from PIL import Image, ImageWin
+import logging
 
 #
 # Constants for GetDeviceCaps
@@ -38,7 +39,9 @@ class PrinterCollage:
 
         self.selected_printer = ""
         if not self._set_printer():
-            raise Exception(f"Error: Could not find any connected printer named ({self.printer_name})")
+            e = f"Error: Could not find any connected printer named ({self.printer_name})"
+            logging.error(e)
+            raise Exception(e)
 
     @staticmethod
     def get_connected_printer():
@@ -88,8 +91,9 @@ class PrinterCollage:
         #
         try:
             bmp = Image.open(path_to_file)
+            logging.info(f"open image for printing: {path_to_file}")
         except FileNotFoundError:
-            print(f"Error: Could not find image {path_to_file}")
+            logging.error(f"Error: Could not find image {path_to_file}")
             return False
         if bmp.size[0] > bmp.size[1]:
             bmp = bmp.rotate(90, expand=True)
@@ -115,6 +119,7 @@ class PrinterCollage:
         hDC.EndPage()
         hDC.EndDoc()
         hDC.DeleteDC()
+        logging.info(f"Image was sent to Printer: {self.selected_printer}")
 
         return True
 

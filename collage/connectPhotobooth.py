@@ -50,9 +50,9 @@ class ConnectPhotobooth:
         # extends the sys module by a flag frozen=True and sets the app
         # path into variable _MEIPASS'.
         if getattr(sys, 'frozen', False):
-            return False
-        else:
             return True
+        else:
+            return False
 
     # function to establish a new connection
     def _check_wlan_connection(self, timeout=100):
@@ -114,7 +114,14 @@ class ConnectPhotobooth:
                 target_filename = f"{current_time}.jpg"
                 target_filepath = self.resource_path(os.path.join("photos", target_filename))
                 os.makedirs(os.path.dirname(target_filepath), exist_ok=True)
+                # Copy tmp image to photo folder
                 shutil.copyfile(self.tmp_pic_path, target_filepath)
+                if self._check_for_pyinstaller():
+                    # also copy image outside of temp folder in case a PyInstaller instance is running
+                    target_filepath = os.path.join("photos", target_filename)
+                    os.makedirs(os.path.dirname(target_filepath), exist_ok=True)
+                    shutil.copyfile(self.tmp_pic_path, target_filepath)
+                    logging.info(f"App is running as executable, copy picture to '{target_filepath}'")
                 self.picture_list.append(target_filepath)
                 logging.info(f"Append picture list with image: '{target_filepath}', total list size: {len(self.picture_list)}")
                 return True
