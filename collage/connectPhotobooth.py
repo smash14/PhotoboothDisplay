@@ -5,7 +5,7 @@ import requests
 import shutil
 import time
 import hashlib
-
+import logging
 
 class ConnectPhotobooth:
     """
@@ -29,7 +29,9 @@ class ConnectPhotobooth:
         self.tmp_pic_path = self.resource_path(os.path.join("tmp", "pic.jpg"))
 
         if not self._check_wlan_connection():
-            raise Exception(f"Error: WiFi of Photobooth is not connected ({self.ssid})")
+            e = f"Error: WiFi of Photobooth is not connected ({self.ssid})"
+            logging.error(e)
+            raise Exception(e)
 
     @staticmethod
     def resource_path(relative_path):
@@ -59,7 +61,7 @@ class ConnectPhotobooth:
             wifi = subprocess.check_output(['netsh', 'WLAN', 'show', 'interfaces'])
             data = wifi.decode('utf-8', 'ignore')
             if self.ssid in data:
-                print(f"Connection to WLAN {self.ssid} established!")
+                logging.info(f"Connection to WLAN {self.ssid} established!")
                 self.connection_established = True
                 return True
             elif self.ssid == "localhost":
@@ -67,7 +69,7 @@ class ConnectPhotobooth:
             else:
                 count = count + 1
                 time.sleep(1)
-        print(f"Error: Could not connect to WiFi network: {self.ssid} after {timeout} seconds")
+        logging.error(f"Error: Could not connect to WiFi network: {self.ssid} after {timeout} seconds")
         return False
 
     def download_picture(self):
@@ -86,13 +88,13 @@ class ConnectPhotobooth:
                     os.makedirs(os.path.dirname(self.tmp_pic_path), exist_ok=True)
                     with open(self.tmp_pic_path, 'wb') as f:
                         shutil.copyfileobj(r.raw, f)
-                    print('Image successfully downloaded: ', self.tmp_pic_path)
+                    logging.info(f"Image successfully downloaded: '{self.tmp_pic_path}'")
                     return True
                 else:
-                    print('Image could not be retrieved')
+                    logging.error('Image could not be retrieved')
                     return False
             except:
-                print(f"Failed to establish a new connection to {self.image_url}")
+                logging.error(f"Failed to establish a new connection to {self.image_url}")
                 self.connection_established = False
 
     def save_and_append_picture(self):
@@ -114,13 +116,13 @@ class ConnectPhotobooth:
                 os.makedirs(os.path.dirname(target_filepath), exist_ok=True)
                 shutil.copyfile(self.tmp_pic_path, target_filepath)
                 self.picture_list.append(target_filepath)
-                print(f"Append picture list with image: {target_filepath}, total list size: {len(self.picture_list)}")
+                logging.info(f"Append picture list with image: '{target_filepath}', total list size: {len(self.picture_list)}")
                 return True
             else:
-                print("Skip saving already existing image")
+                logging.info("Skip saving already existing image")
                 return False
         except FileNotFoundError:
-            print("File not found")
+            logging.error("File not found")
 
     def get_picture_list(self):
         return self.picture_list

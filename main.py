@@ -1,4 +1,5 @@
 import os
+import sys
 from tkinter import *
 from PIL import Image, ImageTk, ImageOps
 from collage.collage import Collage
@@ -6,6 +7,7 @@ from collage.connectPhotobooth import ConnectPhotobooth
 from collage.printerCollage import PrinterCollage
 from utils import resource_path
 import argparse
+import logging
 
 # Global picture list with references to all photobooth pictures
 picture_list = []
@@ -29,15 +31,25 @@ def update_picture_list():
 def validating_args():
     # TODO: Add proper handling of height > width
     if args.collage_width < args.collage_height:
-        raise Exception("Error: Collage target width must be smaller or equal than collage height.")
+        e = "Error: Collage target width must be smaller or equal than collage height."
+        logging.error(e)
+        raise Exception(e)
     if args.collage_margin >= args.collage_height:
-        raise Exception("Error: Collage margin must be smaller than collage height.")
+        e = "Error: Collage margin must be smaller than collage height."
+        logging.error(e)
+        raise Exception(e)
     if args.collage_margin >= args.collage_width:
-        raise Exception("Error: Collage margin must be smaller than collage width.")
+        e = "Error: Collage margin must be smaller than collage width."
+        logging.error(e)
+        raise Exception(e)
     if args.collage_add_margin_bottom >= args.collage_height:
-        raise Exception("Error: Collage additional margin bottom must be smaller than collage height.")
+        e = "Error: Collage additional margin bottom must be smaller than collage height."
+        logging.error(e)
+        raise Exception(e)
     if args.collage_add_margin_bottom + args.collage_margin >= args.collage_height:
-        raise Exception("Error: Collage margin plus additional margin bottom must be smaller than collage height.")
+        e = "Error: Collage margin plus additional margin bottom must be smaller than collage height."
+        logging.error(e)
+        raise Exception(e)
     if args.list_printer:
         list_printers()
 
@@ -45,9 +57,9 @@ def validating_args():
 def list_printers():
     printer_list = PrinterCollage()
     local_printers = printer_list.get_connected_printer()
-    print("You may use one of the following printer names:\r\n")
+    logging.info("You may use one of the following printer names:\r\n")
     for local_printer in local_printers:
-        print(local_printer[2])
+        logging.info(local_printer[2])
     print('\r\nPress any key to exit')
     x = input()
     quit()
@@ -83,7 +95,7 @@ def check_and_redraw_display():
         window.update()
 
     def button_print_collage_2x2_clicked():
-        print("Button print collage 2x2 clicked")
+        logging.info("Button print collage 2x2 clicked")
         printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         button_print_collage_2x2["state"] = "disable"
         open_popup()
@@ -92,7 +104,7 @@ def check_and_redraw_display():
         window.after(5000, enable_button_2x2_5s)
 
     def button_print_collage_1x1_clicked():
-        print("Button print collage 1x1 clicked")
+        logging.info("Button print collage 1x1 clicked")
         printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         button_print_collage_1x1["state"] = "disable"
         open_popup()
@@ -156,24 +168,29 @@ def check_and_redraw_display():
 
 
 if __name__ == '__main__':
-    print("Start Main Application")
-    parser = argparse.ArgumentParser()
+    logging.basicConfig(filename='logfile.log', filemode='w', level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+    logging.getLogger().addHandler(logging.StreamHandler())
+    logging.info("====================================================================")
+    logging.info("Start Main Application")
 
+    # Init Arg Parsing
+    parser = argparse.ArgumentParser()
     parser.add_argument("-pssid", "--photobooth-ssid", type=str, default="localhost",
                         help="WiFi name of Photobooth. Windows must already know the SSID + password (default: %(default)s)")
     parser.add_argument("-purl", "--photobooth-url", type=str, default="http://127.0.0.1/photobooth/pic.jpg",
                         help="URL where to find the latest jpg (default: %(default)s)")
-    parser.add_argument("-pui", "--photobooth-update_interval", type=int, default=2000, choices=range(100, 100000),
+    parser.add_argument("-pui", "--photobooth-update_interval", type=int, default=2000,
                         help="Defines how often the photobooth URL will be checked for a new image in ms (default: %(default)s)")
     parser.add_argument("-cbg", "--collage-background", type=str, default="background.jpg",
                         help="Path to background image of collage picture (default: %(default)s)")
-    parser.add_argument("-cw", "--collage-width", type=int, default=1800, choices=range(1, 10000),
+    parser.add_argument("-cw", "--collage-width", type=int, default=1800,
                         help="Width of final collage picture, should match printer paper (default: %(default)s)")
-    parser.add_argument("-ch", "--collage-height", type=int, default=1200, choices=range(1, 10000),
+    parser.add_argument("-ch", "--collage-height", type=int, default=1200,
                         help="Height of final collage picture, should match printer paper (default: %(default)s)")
-    parser.add_argument("-cm", "--collage-margin", type=int, default=5, choices=range(1, 10000),
+    parser.add_argument("-cm", "--collage-margin", type=int, default=5,
                         help="White border around each single picture within the collage (default: %(default)s)")
-    parser.add_argument("-cmb", "--collage-add-margin-bottom", type=int, default=8, choices=range(1, 10000),
+    parser.add_argument("-cmb", "--collage-add-margin-bottom", type=int, default=8,
                         help="Additional margin at the bottom of collage picture (default: %(default)s)")
     parser.add_argument("-pn", "--printer-name", type=str, default="Microsoft Print to PDF",
                         help="Name of the printer which should be used to print the collage picture (default: %(default)s)")

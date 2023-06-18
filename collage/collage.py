@@ -1,6 +1,7 @@
 import sys
 import os.path
 from PIL import Image, ImageOps
+import logging
 
 
 class Collage:
@@ -35,11 +36,11 @@ class Collage:
             self.background = Image.open(self.background_path)
             bg_width, bg_height = self.background.size
             if bg_width != self.width or bg_height != self.height:
-                print(f"Provided Background size does not fit to target size. Will resize background image for you \r\n"
-                      f"Background size: {bg_width} x {bg_height}, target size: {self.width} x {self.height}")
+                logging.info(f"Provided Background size does not fit to target size. Will resize background image for you \r\n"
+                             f"Background size: {bg_width} x {bg_height}, target size: {self.width} x {self.height}")
                 self.background = ImageOps.fit(self.background, (self.width, self.height))
         else:
-            print(f"Could not find Background image {self.background_path}. Will create a white background for you")
+            logging.warning(f"Could not find Background image {self.background_path}. Will create a white background for you")
             self.background = Image.new("RGB", (self.width, self.height), "white")
 
     def _create_collage_list(self, amount, width, height):
@@ -60,7 +61,7 @@ class Collage:
                 # TODO: Alpha channel seems not to work, image becomes black
                 img_collage = Image.new("RGB", (10, 10), "white")
             except FileNotFoundError:
-                print(f"Error: Could not find picture in picture list: {self.picture_list[x]}")
+                logging.error(f"Error: Could not find picture in picture list: {self.picture_list[x]}")
                 img_collage = Image.new("RGB", (10, 10), "white")
             img_collage = ImageOps.fit(img_collage, (width, height))
             collage_list.append(img_collage)
