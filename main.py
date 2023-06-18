@@ -5,6 +5,7 @@ from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
 from collage.printerCollage import PrinterCollage
 from utils import resource_path
+import argparse
 
 # Global picture list with references to all photobooth pictures
 picture_list = []
@@ -24,8 +25,36 @@ def update_picture_list():
         return True
     return False
 
+
+def validating_args():
+    # TODO: Add proper handling of height > width
+    if args.collage_width < args.collage_height:
+        raise Exception("Error: Collage target width must be smaller or equal than collage height.")
+    if args.collage_margin >= args.collage_height:
+        raise Exception("Error: Collage margin must be smaller than collage height.")
+    if args.collage_margin >= args.collage_width:
+        raise Exception("Error: Collage margin must be smaller than collage width.")
+    if args.collage_add_margin_bottom >= args.collage_height:
+        raise Exception("Error: Collage additional margin bottom must be smaller than collage height.")
+    if args.collage_add_margin_bottom + args.collage_margin >= args.collage_height:
+        raise Exception("Error: Collage margin plus additional margin bottom must be smaller than collage height.")
+    if args.list_printer:
+        list_printers()
+
+
+def list_printers():
+    printer_list = PrinterCollage()
+    local_printers = printer_list.get_connected_printer()
+    print("You may use one of the following printer names:\r\n")
+    for local_printer in local_printers:
+        print(local_printer[2])
+    print('\r\nPress any key to exit')
+    x = input()
+    quit()
+
+
 """
-Functino to update TKinter GUI
+Function to update TKinter GUI
 """
 def check_and_redraw_display():
     global image_collage_2x2  # TODO Images of TKinter needs to be global to prevent garbage collector?!
@@ -50,7 +79,7 @@ def check_and_redraw_display():
         Label(top, image=img_printer).pack(pady=20)
         def close_after_2s():
             top.destroy()
-        window.after(2000, close_after_2s)
+        window.after(5000, close_after_2s)
         window.update()
 
     def button_print_collage_2x2_clicked():
@@ -73,12 +102,14 @@ def check_and_redraw_display():
 
     if update_picture_list():
         # Create new 1x1 collage picture
-        collage_1x1 = Collage(picture_list)
+        collage_1x1 = Collage(picture_list, args.collage_background, args.collage_width, args.collage_height,
+                              args.collage_margin, args.collage_add_margin_bottom)
         collage_1x1.create_collage_1x1()
         collage_1x1.save_collage(resource_path(os.path.join("images", "_collage1x1.jpg")))
 
         # Create new 2x2 collage picture
-        collage_2x2 = Collage(picture_list)
+        collage_2x2 = Collage(picture_list, args.collage_background, args.collage_width, args.collage_height,
+                              args.collage_margin, args.collage_add_margin_bottom)
         collage_2x2.create_collage_2x2()
         collage_2x2.save_collage(resource_path(os.path.join("images", "_collage2x2.jpg")))
 
@@ -120,19 +151,45 @@ def check_and_redraw_display():
         button_print_collage_1x1.grid(row=1, column=1)
 
     # check for new pictures every 2 seconds
-    window.after(2000, check_and_redraw_display)
+    window.after(args.photobooth_update_interval, check_and_redraw_display)
     window.update()
 
 
 if __name__ == '__main__':
-    print("main")
+    print("Start Main Application")
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-pssid", "--photobooth-ssid", type=str, default="localhost",
+                        help="WiFi name of Photobooth. Windows must already know the SSID + password (default: %(default)s)")
+    parser.add_argument("-purl", "--photobooth-url", type=str, default="http://127.0.0.1/photobooth/pic.jpg",
+                        help="URL where to find the latest jpg (default: %(default)s)")
+    parser.add_argument("-pui", "--photobooth-update_interval", type=int, default=2000, choices=range(100, 100000),
+                        help="Defines how often the photobooth URL will be checked for a new image in ms (default: %(default)s)")
+    parser.add_argument("-cbg", "--collage-background", type=str, default="background.jpg",
+                        help="Path to background image of collage picture (default: %(default)s)")
+    parser.add_argument("-cw", "--collage-width", type=int, default=1800, choices=range(1, 10000),
+                        help="Width of final collage picture, should match printer paper (default: %(default)s)")
+    parser.add_argument("-ch", "--collage-height", type=int, default=1200, choices=range(1, 10000),
+                        help="Height of final collage picture, should match printer paper (default: %(default)s)")
+    parser.add_argument("-cm", "--collage-margin", type=int, default=5, choices=range(1, 10000),
+                        help="White border around each single picture within the collage (default: %(default)s)")
+    parser.add_argument("-cmb", "--collage-add-margin-bottom", type=int, default=8, choices=range(1, 10000),
+                        help="Additional margin at the bottom of collage picture (default: %(default)s)")
+    parser.add_argument("-pn", "--printer-name", type=str, default="Microsoft Print to PDF",
+                        help="Name of the printer which should be used to print the collage picture (default: %(default)s)")
+    parser.add_argument("-pl", "--list-printer", action="store_true",
+                        help="Get the name of all available printers to use with --printer-name.")
+
+    args = parser.parse_args()
+    validating_args()
+
     window = Tk()
     window.attributes("-fullscreen", True)
     window.bind("<Escape>", lambda event: window.quit())
 
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
-    photobooth = ConnectPhotobooth("localhost", "http://127.0.0.1/photobooth/pic.jpg")  # TODO: Replace with actual URL of Photobooth
-    printer = PrinterCollage("Microsoft Print to PDF") # TODO: Replace with actual printer name e.g. Canon SELPHY CP1500
+    photobooth = ConnectPhotobooth(args.photobooth_ssid, args.photobooth_url)
+    printer = PrinterCollage(args.printer_name)
     check_and_redraw_display()
     window.mainloop()
