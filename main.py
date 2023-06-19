@@ -22,7 +22,8 @@ Append Picture List with new pictures taken from photobox
 """
 def update_picture_list():
     global picture_list
-    picture_list, new_image_added = photobooth.get_new_pictures()
+    # TODO: Add proper error handling
+    picture_list, new_image_added, error = photobooth.get_new_pictures()
     if new_image_added:
         return True
     return False

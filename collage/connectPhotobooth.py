@@ -23,7 +23,6 @@ class ConnectPhotobooth:
         self.ssid = ssid
         self.image_url = image_url
 
-        self.connection_established = False
         self.picture_list = []
 
         self.tmp_pic_path = self.resource_path(os.path.join("tmp", "pic.jpg"))
@@ -95,7 +94,7 @@ class ConnectPhotobooth:
                     return False
             except:
                 logging.error(f"Failed to establish a new connection to {self.image_url}")
-                self.connection_established = False
+                return False
 
     def save_and_append_picture(self):
         """
@@ -136,10 +135,12 @@ class ConnectPhotobooth:
 
     def get_new_pictures(self):
         new_image_added = False
-        self.download_picture()
-        if self.save_and_append_picture():
-            new_image_added = True
-        return self.picture_list, new_image_added
+        error = True
+        if self.download_picture():
+            error = False
+            if self.save_and_append_picture():
+                new_image_added = True
+        return self.picture_list, new_image_added, error
 
     @staticmethod
     def calculate_hash(file_path):
