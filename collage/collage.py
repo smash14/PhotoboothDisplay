@@ -71,7 +71,7 @@ class Collage:
         # calculate width and height of each single collage picture according to border margin and bottom margin
         collage_picture_width = int(self.width / 2 - self.margin_width - 0.5 * self.margin_width)
         collage_picture_height = int(self.height / 2 - self.margin_height
-                                     - 0.5 * self.margin_height - self.margin_bottom)
+                                     - 0.5 * self.margin_height - self.margin_bottom * 0.5)
 
         collage_list = self._create_collage_list(4, collage_picture_width, collage_picture_height)
 
