@@ -1,5 +1,6 @@
 import os
 import sys
+import tkinter.font
 from tkinter import *
 from PIL import Image, ImageTk, ImageOps
 from collage.collage import Collage
@@ -155,12 +156,14 @@ def check_and_redraw_display():
         label_collage_single.grid(row=0, column=1, padx=100, pady=100)
 
         # Create a Label Widget to display print buttons below each collage picture
-        button_print_collage_2x2 = Button(master=window, text='Bild ausdrucken', width='100', height='5', bg='#CCCCCC',
-                                          command=button_print_collage_2x2_clicked)
+        tmp = tkinter.font.families()
+        bahnschrift = ("Bahnschrift SemiBold SemiCondensed", 24)
+        button_print_collage_2x2 = Button(master=window, text='Bild ausdrucken', width='50', height='2', bg='#ffffff',
+                                          font=bahnschrift, command=button_print_collage_2x2_clicked)
         button_print_collage_2x2.grid(row=1, column=0)
 
-        button_print_collage_1x1 = Button(master=window, text='Bild ausdrucken', width='100', height='5', bg='#CCCCCC',
-                                             command=button_print_collage_1x1_clicked)
+        button_print_collage_1x1 = Button(master=window, text='Bild ausdrucken', width='50', height='2', bg='#ffffff',
+                                          font=bahnschrift, command=button_print_collage_1x1_clicked)
         button_print_collage_1x1.grid(row=1, column=1)
 
     # check for new pictures every 2 seconds
@@ -204,6 +207,12 @@ if __name__ == '__main__':
     window = Tk()
     window.attributes("-fullscreen", True)
     window.bind("<Escape>", lambda event: window.quit())
+    # put image in a label and place label as background
+    wallpaper = Image.open(resource_path(os.path.join("images", "wallpaper.jpg")))
+    wallpaper = ImageOps.fit(wallpaper, ( window.winfo_screenwidth(),  window.winfo_screenheight()))
+    wallpaper = ImageTk.PhotoImage(wallpaper)
+    label_wp = Label(window, image=wallpaper)
+    label_wp.place(x=0, y=0, relwidth=1, relheight=1) # make label l to fit the parent window always
 
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
