@@ -7,7 +7,8 @@ Below each picture is a print button located, which directly sends the collage p
 Works with Windows only.
 
 ## Feature overview
-![screenshot](https://github.com/smash14/PhotoboothDisplay/assets/36343912/ee7ef980-23fc-4146-8ef0-cd4c1b621c24)
+![Screenshot 2022-04-27 175241](https://github.com/smash14/PhotoboothDisplay/assets/36343912/29ccfbbd-1c99-4518-b420-c056f1103d71)
+
 
 - Regularly pulls a new jpg image from a given URL, time interval is adjustable
 - Saves each new picture in a folder called "photos"
