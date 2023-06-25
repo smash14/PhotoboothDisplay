@@ -17,6 +17,7 @@ picture_list = []
 image_collage_2x2 = Image
 image_collage_single = Image
 img_printer = Image
+pixel = Image
 
 """
 Append Picture List with new pictures taken from photobox
@@ -73,6 +74,7 @@ Function to update TKinter GUI
 def check_and_redraw_display():
     global image_collage_2x2  # TODO Images of TKinter needs to be global to prevent garbage collector?!
     global image_collage_single
+    global pixel
 
     # Popup to show printing process for a few seconds
     def open_popup():
@@ -132,6 +134,8 @@ def check_and_redraw_display():
         screen_height = window.winfo_screenheight()
         padding = 100
         picture_width = int(screen_width / 2 - padding * 2)
+        button_width = int(picture_width)
+        button_height = int(screen_height / 10)
 
         # Create an object of tkinter ImageTk for Collage 2x2
         image_collage_2x2 = Image.open(resource_path(os.path.join("images", "_collage2x2.jpg")))
@@ -156,13 +160,15 @@ def check_and_redraw_display():
         label_collage_single.grid(row=0, column=1, padx=100, pady=100)
 
         # Create a Label Widget to display print buttons below each collage picture
-        tmp = tkinter.font.families()
         bahnschrift = ("Bahnschrift SemiBold SemiCondensed", 24)
-        button_print_collage_2x2 = Button(master=window, text='Bild ausdrucken', width='50', height='2', bg='#ffffff',
+        pixel = PhotoImage(width=1, height=1)  # create invisible image so width and height are interpreted as pixels
+        button_print_collage_2x2 = Button(master=window, text='Bild ausdrucken', bg='#ffffff', image=pixel,
+                                          width=button_width, height=button_height, compound="center",
                                           font=bahnschrift, command=button_print_collage_2x2_clicked)
         button_print_collage_2x2.grid(row=1, column=0)
 
-        button_print_collage_1x1 = Button(master=window, text='Bild ausdrucken', width='50', height='2', bg='#ffffff',
+        button_print_collage_1x1 = Button(master=window, text='Bild ausdrucken', bg='#ffffff', image=pixel,
+                                          width=button_width, height=button_height, compound="center",
                                           font=bahnschrift, command=button_print_collage_1x1_clicked)
         button_print_collage_1x1.grid(row=1, column=1)
 
