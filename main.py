@@ -181,7 +181,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='w', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("====================================================================")
+    logging.info("============================ V1.0 ============================")
     logging.info("Start Main Application")
 
     # Init Arg Parsing
