@@ -59,9 +59,14 @@ class Collage:
                 img_collage = Image.open(self.picture_list[x])
             except IndexError:
                 # TODO: Alpha channel seems not to work, image becomes black
+                logging.warning(f"Index error while creating collage. Maybe not enough photos until now.")
                 img_collage = Image.new("RGB", (10, 10), "white")
             except FileNotFoundError:
                 logging.error(f"Error: Could not find picture in picture list: {self.picture_list[x]}")
+                img_collage = Image.new("RGB", (10, 10), "white")
+            except Exception as e:
+                logging.error(f"Unknown Error: {e}")
+                logging.info(f"Create empty image for you")
                 img_collage = Image.new("RGB", (10, 10), "white")
             img_collage = ImageOps.fit(img_collage, (width, height))
             collage_list.append(img_collage)

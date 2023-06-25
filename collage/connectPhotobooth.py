@@ -28,7 +28,7 @@ class ConnectPhotobooth:
         self.tmp_pic_path = self.resource_path(os.path.join("tmp", "pic.jpg"))
 
         if not self._check_wlan_connection():
-            e = f"Error: WiFi of Photobooth is not connected ({self.ssid})"
+            e = f"Error: Your System is not connected to the given WiFi network ({self.ssid})"
             logging.error(e)
             raise Exception(e)
 
@@ -54,21 +54,32 @@ class ConnectPhotobooth:
             return False
 
     # function to establish a new connection
-    def _check_wlan_connection(self, timeout=100):
+    def _check_wlan_connection(self, timeout=20):
+        logging.info(f"Wait for a connection to WiFi network {self.ssid}")
+        if self.ssid == "localhost":
+            return True
+        # check if network is in list of known networks
+        networks = subprocess.check_output(['netsh', 'WLAN', 'show', 'profiles'])
+        networks = networks.decode('utf-8', 'ignore')
+        if self.ssid not in networks:
+            logging.error(f"Error, {self.ssid} is not a known WiFi name. Please make the initial connection to the"
+                          f" WiFi network using Windows")
+            return False
         count = 0
         while count < timeout:
+            print('.', end='', flush=True)
             wifi = subprocess.check_output(['netsh', 'WLAN', 'show', 'interfaces'])
             data = wifi.decode('utf-8', 'ignore')
             if self.ssid in data:
-                logging.info(f"Connection to WLAN {self.ssid} established!")
+                logging.info(f"Connection to WLAN {self.ssid} established on {count} attempt!")
                 self.connection_established = True
-                return True
-            elif self.ssid == "localhost":
                 return True
             else:
                 count = count + 1
-                time.sleep(1)
-        logging.error(f"Error: Could not connect to WiFi network: {self.ssid} after {timeout} seconds")
+                time.sleep(5)
+        print("")
+        logging.error(f"Error: Could not connect to WiFi network: {self.ssid} after {timeout} attempts. Make sure "
+                      f"that you have manually connected to the correct WiFi network.")
         return False
 
     def download_picture(self):
