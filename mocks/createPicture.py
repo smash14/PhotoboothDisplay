@@ -2,6 +2,8 @@ import sys
 import os
 import shutil
 import keyboard
+import time
+import schedule
 
 """
 Script to create a file named "pic.jpg" each time the ENTER key is pressed on the keyboard.
@@ -38,6 +40,13 @@ def create_copy():
 def on_key_press(event):
     if event.name == 'enter':
         create_copy()
+    if event.name == "a":
+        print("Key a pressed")
+        create_copy()
+        schedule.every(10).seconds.do(create_copy)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
 
 
 def resource_path(relative_path):
