@@ -27,8 +27,8 @@ class ConnectPhotobooth:
 
         self.tmp_pic_path = self.resource_path(os.path.join("tmp", "pic.jpg"))
 
-        if not self._check_wlan_connection():
-            e = f"Error: Your System is not connected to the given WiFi network ({self.ssid})"
+        if not self.download_picture():
+            e = f"Error: Could not retrieve any pictures from photobooth!"
             logging.error(e)
             raise Exception(e)
 
@@ -67,14 +67,14 @@ class ConnectPhotobooth:
             return False
         count = 0
         while count < timeout:
-            print('.', end='', flush=True)
             wifi = subprocess.check_output(['netsh', 'WLAN', 'show', 'interfaces'])
             data = wifi.decode('utf-8', 'ignore')
             if self.ssid in data:
-                logging.info(f"Connection to WLAN {self.ssid} established on {count} attempt!")
+                logging.info(f"Connection to WLAN {self.ssid} established on {count+1} attempt!")
                 self.connection_established = True
                 return True
             else:
+                print('.', end='', flush=True)
                 count = count + 1
                 time.sleep(5)
         print("")
@@ -103,8 +103,8 @@ class ConnectPhotobooth:
                 else:
                     logging.error('Image could not be retrieved')
                     return False
-            except:
-                logging.error(f"Failed to establish a new connection to {self.image_url}")
+            except Exception as e:
+                logging.error(f"Failed to establish a new connection to {self.image_url} with error message: {e}")
                 return False
 
     def save_and_append_picture(self):
