@@ -25,7 +25,7 @@ Append Picture List with new pictures taken from photobox
 def update_picture_list():
     global picture_list
     # TODO: Add proper error handling
-    picture_list, new_image_added, error = photobooth.get_new_pictures()
+    picture_list, new_image_added, _ = photobooth.get_new_pictures()
     if new_image_added:
         return True
     return False
@@ -119,13 +119,15 @@ def check_and_redraw_display():
     if update_picture_list():
         # Create new 1x1 collage picture
         collage_1x1 = Collage(picture_list, args.collage_background, args.collage_width, args.collage_height,
-                              args.collage_margin, args.collage_add_margin_bottom)
+                              args.collage_margin, args.collage_add_margin_bottom, args.collage_enhance_brightness,
+                              args.collage_enhance_contrast)
         collage_1x1.create_collage_1x1()
         collage_1x1.save_collage(resource_path(os.path.join("images", "_collage1x1.jpg")))
 
         # Create new 2x2 collage picture
         collage_2x2 = Collage(picture_list, args.collage_background, args.collage_width, args.collage_height,
-                              args.collage_margin, args.collage_add_margin_bottom)
+                              args.collage_margin, args.collage_add_margin_bottom, args.collage_enhance_brightness,
+                              args.collage_enhance_contrast)
         collage_2x2.create_collage_2x2()
         collage_2x2.save_collage(resource_path(os.path.join("images", "_collage2x2.jpg")))
 
@@ -181,7 +183,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='w', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.1 ============================")
+    logging.info("============================ V1.3 ============================")
     logging.info("Start Main Application")
 
     # Init Arg Parsing
@@ -192,6 +194,8 @@ if __name__ == '__main__':
                         help="URL where to find the latest jpg (default: %(default)s)")
     parser.add_argument("-pui", "--photobooth-update_interval", type=int, default=2000,
                         help="Defines how often the photobooth URL will be checked for a new image in ms (default: %(default)s)")
+    parser.add_argument("-phash", "--photobooth-image_hash", type=str, default="none",
+                        help="URL of txt file which provides the md5 hash of the latest image (default: %(default)s)")
     parser.add_argument("-cbg", "--collage-background", type=str, default="background.jpg",
                         help="Path to background image of collage picture (default: %(default)s)")
     parser.add_argument("-cw", "--collage-width", type=int, default=1800,
@@ -202,6 +206,10 @@ if __name__ == '__main__':
                         help="White border around each single picture within the collage (default: %(default)s)")
     parser.add_argument("-cmb", "--collage-add-margin-bottom", type=int, default=8,
                         help="Additional margin at the bottom of collage picture (default: %(default)s)")
+    parser.add_argument("-ceb", "--collage-enhance_brightness", type=float, default=1.0,
+                        help="Factor to enhance brightness of collage picture (default: %(default)s)")
+    parser.add_argument("-cec", "--collage-enhance_contrast", type=float, default=1.0,
+                        help="Factor to enhance contrast of collage picture (default: %(default)s)")
     parser.add_argument("-pn", "--printer-name", type=str, default="Microsoft Print to PDF",
                         help="Name of the printer which should be used to print the collage picture (default: %(default)s)")
     parser.add_argument("-pl", "--list-printer", action="store_true",
@@ -222,7 +230,7 @@ if __name__ == '__main__':
 
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
-    photobooth = ConnectPhotobooth(args.photobooth_ssid, args.photobooth_url)
+    photobooth = ConnectPhotobooth(args.photobooth_ssid, args.photobooth_url, args.photobooth_image_hash)
     printer = PrinterCollage(args.printer_name)
     check_and_redraw_display()
     window.mainloop()

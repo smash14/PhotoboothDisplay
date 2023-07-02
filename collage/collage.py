@@ -1,11 +1,12 @@
 import sys
 import os.path
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageEnhance
 import logging
 
 
 class Collage:
-    def __init__(self, picture_list, background_path="images/background.jpg", width=6048, height=4032, margin_border=5, margin_bottom=8):
+    def __init__(self, picture_list, background_path="images/background.jpg", width=6048, height=4032, margin_border=5,
+                 margin_bottom=8, brightness_factor=1, contrast_factor=1):
         self.background_path = background_path
         self.width = width
         self.height = height
@@ -14,6 +15,10 @@ class Collage:
 
         self.margin_border = margin_border
         self.margin_bottom = margin_bottom
+
+        # Image enhacements for brightness and contrast
+        self.brightness_factor = brightness_factor
+        self.contrast_factor = contrast_factor
 
         # self.ratio = width / height  # aspect ratio of background picture
         self.margin_width = int(self.width * self.margin_border / 100)
@@ -68,8 +73,21 @@ class Collage:
                 logging.error(f"Unknown Error: {e}")
                 logging.info(f"Create empty image for you")
                 img_collage = Image.new("RGB", (10, 10), "white")
-            img_collage = ImageOps.fit(img_collage, (width, height))
-            collage_list.append(img_collage)
+            try:
+                # Apply enhancements for brightness and contrast
+                enhancer_brightness = ImageEnhance.Brightness(img_collage)
+                img_enhanced_brightness = enhancer_brightness.enhance(self.brightness_factor)
+                enhancer_contrast = ImageEnhance.Contrast(img_enhanced_brightness)
+                img_enhanced_contrast = enhancer_contrast.enhance(self.contrast_factor)
+
+                # Fit image to collage size
+                img_collage = ImageOps.fit(img_enhanced_contrast, (width, height))
+                collage_list.append(img_collage)
+            except Exception as e:
+                logging.error(f"Create fallback image due to unhandled exception: {e}")
+                img_collage = Image.new("RGB", (10, 10), "black")
+                img_collage = ImageOps.fit(img_collage, (width, height))
+                collage_list.append(img_collage)
         return collage_list
 
     def create_collage_2x2(self):

@@ -11,7 +11,7 @@ class ConnectPhotobooth:
     """
     Class to Connect with a Photobox WiFi Network
     """
-    def __init__(self, ssid, image_url):
+    def __init__(self, ssid, image_url, image_hash_url):
         """
         Parameters
         __________
@@ -22,6 +22,7 @@ class ConnectPhotobooth:
         """
         self.ssid = ssid
         self.image_url = image_url
+        self.image_hash_url = image_hash_url
 
         self.picture_list = []
 
@@ -82,7 +83,7 @@ class ConnectPhotobooth:
                       f"that you have manually connected to the correct WiFi network.")
         return False
 
-    def download_picture(self):
+    def download_picture(self, attempt=0):
         """
         Download temporary image "pic.jpg" to "tmp/pic.jpg"
         :return:
@@ -98,6 +99,14 @@ class ConnectPhotobooth:
                     os.makedirs(os.path.dirname(self.tmp_pic_path), exist_ok=True)
                     with open(self.tmp_pic_path, 'wb') as f:
                         shutil.copyfileobj(r.raw, f)
+                    if self.image_hash_url != "none":
+                        hash_url_response = requests.get(self.image_hash_url)
+                        if hash_url_response.status_code == 200:
+                            hash_photobooth = hash_url_response.text
+                            hash_local = self.calculate_hash(self.tmp_pic_path)
+                            if hash_local != hash_photobooth:
+                                logging.error(f"MD5 Checksum of downloaded picture does not match")
+                                return False
                     logging.info(f"Image successfully downloaded: '{self.tmp_pic_path}'")
                     return True
                 else:
