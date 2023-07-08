@@ -180,10 +180,10 @@ def check_and_redraw_display():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='logfile.log', filemode='w', level=logging.INFO,
+    logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.3 ============================")
+    logging.info("============================ V1.3.1 ============================")
     logging.info("Start Main Application")
 
     # Init Arg Parsing
