@@ -4,6 +4,7 @@ import shutil
 import keyboard
 import time
 import schedule
+import hashlib
 
 """
 Script to create a file named "pic.jpg" each time the ENTER key is pressed on the keyboard.
@@ -18,6 +19,12 @@ file_list = ['pic1.jpg', 'pic2.jpg', 'pic3.jpg', 'pic4.jpg', 'pic5.jpg', 'pic6.j
 # Current index in the file list
 current_index = 0
 
+def calculate_hash(file_path):
+    with open(file_path, 'rb') as file:
+        data = file.read()
+        hash_sum = hashlib.md5(data).hexdigest()
+    return hash_sum
+
 
 def create_copy():
     global current_index
@@ -29,8 +36,12 @@ def create_copy():
     # Create a copy of the picture
     old_file_name = resource_path(file_list[current_index])
     new_file_name = 'pic.jpg'
+
     shutil.copyfile(old_file_name, new_file_name)
-    print(f'Created a copy of {old_file_name} as {new_file_name}.')
+    hash_sum = calculate_hash('pic.jpg')
+    with open('hash.txt', 'w') as f:
+        f.write(hash_sum)
+    print(f'Created a copy of {old_file_name} as {new_file_name} with hash {hash_sum}.')
 
     # Increment the index or reset if it reaches the end of the list
     current_index = (current_index + 1) % len(file_list)
