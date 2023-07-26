@@ -83,7 +83,35 @@ class ConnectPhotobooth:
                       f"that you have manually connected to the correct WiFi network.")
         return False
 
-    def download_picture(self, attempt=0):
+    def _get_hash_from_photobooth(self):
+        if self.image_hash_url is not None:
+            try:
+                hash_url_response = requests.get(self.image_hash_url)
+                if hash_url_response.status_code == 200:
+                    return hash_url_response.text
+            except Exception as e:
+                logging.error(f"Failed to fetch MD5 Checksum from {self.image_hash_url} with error message: {e}")
+        return None
+
+    def _check_for_changed_checksum(self):
+        """
+        Checks if a given URL to a txt file includes a MD5 checksum which differs from a destination file
+        returns True if checksum is different
+        """
+        # If no tmp picture is available, early return with True
+        if not os.path.isfile(self.tmp_pic_path):
+            return True
+
+        hash_photobooth = self._get_hash_from_photobooth()
+        hash_local = self.calculate_hash(self.tmp_pic_path)
+
+        if hash_local != hash_photobooth:
+            logging.info(f"MD5 Checksum of remote picture (PHOTOBOOTH) is {hash_photobooth}")
+            return True
+
+        return False
+
+    def download_picture(self):
         """
         Download temporary image "pic.jpg" to "tmp/pic.jpg"
         :return:
@@ -99,14 +127,13 @@ class ConnectPhotobooth:
                     os.makedirs(os.path.dirname(self.tmp_pic_path), exist_ok=True)
                     with open(self.tmp_pic_path, 'wb') as f:
                         shutil.copyfileobj(r.raw, f)
-                    if self.image_hash_url != "none":
-                        hash_url_response = requests.get(self.image_hash_url)
-                        if hash_url_response.status_code == 200:
-                            hash_photobooth = hash_url_response.text
-                            hash_local = self.calculate_hash(self.tmp_pic_path)
-                            if hash_local != hash_photobooth:
-                                logging.error(f"MD5 Checksum of downloaded picture does not match")
-                                return False
+
+                    # Compare Checksum of downloaded picture with online reference
+                    hash_photobooth = self._get_hash_from_photobooth()
+                    hash_local = self.calculate_hash(self.tmp_pic_path)
+                    if hash_photobooth is not None and hash_local != hash_photobooth:
+                        logging.error(f"MD5 Checksum of downloaded picture does not match")
+                        return False
                     logging.info(f"Image successfully downloaded: '{self.tmp_pic_path}'")
                     return True
                 else:
@@ -154,13 +181,17 @@ class ConnectPhotobooth:
         return self.picture_list
 
     def get_new_pictures(self):
+        """
+        1) Check of online picture has a new checksum
+        2) Download tmp image
+        3) Check if downloaded tmp image is not yet in picture list
+        """
         new_image_added = False
-        error = True
-        if self.download_picture():
-            error = False
-            if self.save_and_append_picture():
-                new_image_added = True
-        return self.picture_list, new_image_added, error
+        if self._check_for_changed_checksum():
+            if self.download_picture():
+                if self.save_and_append_picture():
+                    new_image_added = True
+        return self.picture_list, new_image_added
 
     @staticmethod
     def calculate_hash(file_path):

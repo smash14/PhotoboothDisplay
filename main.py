@@ -25,7 +25,7 @@ Append Picture List with new pictures taken from photobox
 def update_picture_list():
     global picture_list
     # TODO: Add proper error handling
-    picture_list, new_image_added, _ = photobooth.get_new_pictures()
+    picture_list, new_image_added = photobooth.get_new_pictures()
     if new_image_added:
         return True
     return False
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.3.1 ============================")
+    logging.info("============================ V1.4 ============================")
     logging.info("Start Main Application")
 
     # Init Arg Parsing
@@ -194,7 +194,7 @@ if __name__ == '__main__':
                         help="URL where to find the latest jpg (default: %(default)s)")
     parser.add_argument("-pui", "--photobooth-update_interval", type=int, default=2000,
                         help="Defines how often the photobooth URL will be checked for a new image in ms (default: %(default)s)")
-    parser.add_argument("-phash", "--photobooth-image_hash", type=str, default="none",
+    parser.add_argument("-phash", "--photobooth-image_hash", type=str, default=None,
                         help="URL of txt file which provides the md5 hash of the latest image (default: %(default)s)")
     parser.add_argument("-cbg", "--collage-background", type=str, default="background.jpg",
                         help="Path to background image of collage picture (default: %(default)s)")
