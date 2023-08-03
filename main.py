@@ -100,18 +100,18 @@ def check_and_redraw_display():
 
     def button_print_collage_2x2_clicked():
         logging.info("Button print collage 2x2 clicked")
-        printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         button_print_collage_2x2["state"] = "disable"
         open_popup()
+        printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         def enable_button_2x2_5s():
             button_print_collage_2x2["state"] = "normal"
         window.after(5000, enable_button_2x2_5s)
 
     def button_print_collage_1x1_clicked():
         logging.info("Button print collage 1x1 clicked")
-        printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         button_print_collage_1x1["state"] = "disable"
         open_popup()
+        printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         def enable_button_1x1_5s():
             button_print_collage_1x1["state"] = "normal"
         window.after(5000, enable_button_1x1_5s)
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.4 ============================")
+    logging.info("============================ V1.4.1 ============================")
     logging.info("Start Main Application")
 
     # Init Arg Parsing
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     wallpaper = ImageOps.fit(wallpaper, ( window.winfo_screenwidth(),  window.winfo_screenheight()))
     wallpaper = ImageTk.PhotoImage(wallpaper)
     label_wp = Label(window, image=wallpaper)
-    label_wp.place(x=0, y=0, relwidth=1, relheight=1) # make label l to fit the parent window always
+    label_wp.place(x=0, y=0, relwidth=1, relheight=1)  # make label l to fit the parent window always
 
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
