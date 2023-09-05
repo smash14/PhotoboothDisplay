@@ -1,13 +1,17 @@
 import os
 import sys
+import json
 import tkinter.font
 from tkinter import *
 from PIL import Image, ImageTk, ImageOps
+
+import generate_settings
 from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
 from collage.printerCollage import PrinterCollage
 from utils import resource_path
-import argparse
+from print_job_checker import print_job_checker
+from generate_settings import generate_settings_main
 import logging
 
 # Global picture list with references to all photobooth pictures
@@ -18,11 +22,13 @@ image_collage_2x2 = Image
 image_collage_single = Image
 img_printer = Image
 pixel = Image
+args = {}
 
-"""
-Append Picture List with new pictures taken from photobox
-"""
+
 def update_picture_list():
+    """
+    Append Picture List with new pictures taken from photobox
+    """
     global picture_list
     # TODO: Add proper error handling
     picture_list, new_image_added = photobooth.get_new_pictures()
@@ -31,47 +37,60 @@ def update_picture_list():
     return False
 
 
+def open_settings_file():
+    global args
+    if not os.path.isfile('settings.json'):
+        logging.warning("No settings file available, will create one for you...")
+        generate_settings.generate_settings_main()
+    with open('settings.json') as settings_file:
+        file_contents = settings_file.read()
+        logging.info("Found settings.json file")
+    try:
+        args = json.loads(file_contents)
+    except Exception as e:
+        logging.error(f"Error while reading settings.json file: {e}\r\n"
+                      f"Please repair settings file manually or delete it!")
+        raise SystemExit
+    logging.info(json.dumps(args, indent=4))
+
+
 def validating_args():
     # TODO: Add proper handling of height > width
-    if args.collage_width < args.collage_height:
+    if args['collage_width'] < args['collage_height']:
         e = "Error: Collage target width must be smaller or equal than collage height."
         logging.error(e)
         raise Exception(e)
-    if args.collage_margin >= args.collage_height:
+    if args['collage_margin'] >= args['collage_height']:
         e = "Error: Collage margin must be smaller than collage height."
         logging.error(e)
         raise Exception(e)
-    if args.collage_margin >= args.collage_width:
+    if args['collage_margin'] >= args['collage_width']:
         e = "Error: Collage margin must be smaller than collage width."
         logging.error(e)
         raise Exception(e)
-    if args.collage_add_margin_bottom >= args.collage_height:
+    if args['collage_add_margin_bottom'] >= args['collage_height']:
         e = "Error: Collage additional margin bottom must be smaller than collage height."
         logging.error(e)
         raise Exception(e)
-    if args.collage_add_margin_bottom + args.collage_margin >= args.collage_height:
+    if args['collage_add_margin_bottom'] + args['collage_margin'] >= args['collage_height']:
         e = "Error: Collage margin plus additional margin bottom must be smaller than collage height."
         logging.error(e)
         raise Exception(e)
-    if args.list_printer:
-        list_printers()
 
 
 def list_printers():
     printer_list = PrinterCollage()
     local_printers = printer_list.get_connected_printer()
-    logging.info("You may use one of the following printer names:\r\n")
+    logging.info("You may use one of the following printer names:")
     for local_printer in local_printers:
         logging.info(local_printer[2])
-    print('\r\nPress any key to exit')
-    x = input()
-    quit()
+    logging.info("---------------------------------")
 
 
-"""
-Function to update TKinter GUI
-"""
 def check_and_redraw_display():
+    """
+    Function to update TKinter GUI
+    """
     global image_collage_2x2  # TODO Images of TKinter needs to be global to prevent garbage collector?!
     global image_collage_single
     global pixel
@@ -94,15 +113,21 @@ def check_and_redraw_display():
         Label(top, text="Wird gedruckt...", font=('Helvetica 26 bold')).pack(pady=10)
         Label(top, image=img_printer).pack(pady=20)
         def close_after_2s():
-            top.destroy()
-        window.after(5000, close_after_2s)
+            if not print_job_checker(args['printer_name']):
+                top.destroy()
+            else:
+                window.after(2000, close_after_2s)
+        window.after(2000, close_after_2s)
         window.update()
 
     def button_print_collage_2x2_clicked():
         logging.info("Button print collage 2x2 clicked")
         button_print_collage_2x2["state"] = "disable"
-        open_popup()
-        printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
+        if not print_job_checker(args['printer_name']):
+            open_popup()
+            printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
+        else:
+            logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
         def enable_button_2x2_5s():
             button_print_collage_2x2["state"] = "normal"
         window.after(5000, enable_button_2x2_5s)
@@ -110,24 +135,27 @@ def check_and_redraw_display():
     def button_print_collage_1x1_clicked():
         logging.info("Button print collage 1x1 clicked")
         button_print_collage_1x1["state"] = "disable"
-        open_popup()
-        printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
+        if not print_job_checker(args['printer_name']):
+            open_popup()
+            printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
+        else:
+            logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
         def enable_button_1x1_5s():
             button_print_collage_1x1["state"] = "normal"
         window.after(5000, enable_button_1x1_5s)
 
     if update_picture_list():
         # Create new 1x1 collage picture
-        collage_1x1 = Collage(picture_list, args.collage_background, args.collage_width, args.collage_height,
-                              args.collage_margin, args.collage_add_margin_bottom, args.collage_enhance_brightness,
-                              args.collage_enhance_contrast)
+        collage_1x1 = Collage(picture_list, args['collage_background'], args['collage_width'], args['collage_height'],
+                              args['collage_margin'], args['collage_add_margin_bottom'],
+                              args['collage_enhance_brightness'], args['collage_enhance_contrast'])
         collage_1x1.create_collage_1x1()
         collage_1x1.save_collage(resource_path(os.path.join("images", "_collage1x1.jpg")))
 
         # Create new 2x2 collage picture
-        collage_2x2 = Collage(picture_list, args.collage_background, args.collage_width, args.collage_height,
-                              args.collage_margin, args.collage_add_margin_bottom, args.collage_enhance_brightness,
-                              args.collage_enhance_contrast)
+        collage_2x2 = Collage(picture_list, args['collage_background'], args['collage_width'], args['collage_height'],
+                              args['collage_margin'], args['collage_add_margin_bottom'],
+                              args['collage_enhance_brightness'], args['collage_enhance_contrast'])
         collage_2x2.create_collage_2x2()
         collage_2x2.save_collage(resource_path(os.path.join("images", "_collage2x2.jpg")))
 
@@ -175,7 +203,7 @@ def check_and_redraw_display():
         button_print_collage_1x1.grid(row=1, column=1)
 
     # check for new pictures every 2 seconds
-    window.after(args.photobooth_update_interval, check_and_redraw_display)
+    window.after(args['photobooth_update_interval'], check_and_redraw_display)
     window.update()
 
 
@@ -183,54 +211,26 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.4.1 ============================")
+    logging.info("============================ V1.5 ============================")
     logging.info("Start Main Application")
 
-    # Init Arg Parsing
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-pssid", "--photobooth-ssid", type=str, default="localhost",
-                        help="WiFi name of Photobooth. Windows must already know the SSID + password (default: %(default)s)")
-    parser.add_argument("-purl", "--photobooth-url", type=str, default="http://127.0.0.1/photobooth/pic.jpg",
-                        help="URL where to find the latest jpg (default: %(default)s)")
-    parser.add_argument("-pui", "--photobooth-update_interval", type=int, default=2000,
-                        help="Defines how often the photobooth URL will be checked for a new image in ms (default: %(default)s)")
-    parser.add_argument("-phash", "--photobooth-image_hash", type=str, default=None,
-                        help="URL of txt file which provides the md5 hash of the latest image (default: %(default)s)")
-    parser.add_argument("-cbg", "--collage-background", type=str, default="background.jpg",
-                        help="Path to background image of collage picture (default: %(default)s)")
-    parser.add_argument("-cw", "--collage-width", type=int, default=1800,
-                        help="Width of final collage picture, should match printer paper (default: %(default)s)")
-    parser.add_argument("-ch", "--collage-height", type=int, default=1200,
-                        help="Height of final collage picture, should match printer paper (default: %(default)s)")
-    parser.add_argument("-cm", "--collage-margin", type=int, default=5,
-                        help="White border around each single picture within the collage (default: %(default)s)")
-    parser.add_argument("-cmb", "--collage-add-margin-bottom", type=int, default=8,
-                        help="Additional margin at the bottom of collage picture (default: %(default)s)")
-    parser.add_argument("-ceb", "--collage-enhance_brightness", type=float, default=1.0,
-                        help="Factor to enhance brightness of collage picture (default: %(default)s)")
-    parser.add_argument("-cec", "--collage-enhance_contrast", type=float, default=1.0,
-                        help="Factor to enhance contrast of collage picture (default: %(default)s)")
-    parser.add_argument("-pn", "--printer-name", type=str, default="Microsoft Print to PDF",
-                        help="Name of the printer which should be used to print the collage picture (default: %(default)s)")
-    parser.add_argument("-pl", "--list-printer", action="store_true",
-                        help="Get the name of all available printers to use with --printer-name.")
-
-    args = parser.parse_args()
+    open_settings_file()
     validating_args()
+    list_printers()
 
     window = Tk()
     window.attributes("-fullscreen", True)
     window.bind("<Escape>", lambda event: window.quit())
     # put image in a label and place label as background
     wallpaper = Image.open(resource_path(os.path.join("images", "wallpaper.jpg")))
-    wallpaper = ImageOps.fit(wallpaper, ( window.winfo_screenwidth(),  window.winfo_screenheight()))
+    wallpaper = ImageOps.fit(wallpaper, (window.winfo_screenwidth(),  window.winfo_screenheight()))
     wallpaper = ImageTk.PhotoImage(wallpaper)
     label_wp = Label(window, image=wallpaper)
     label_wp.place(x=0, y=0, relwidth=1, relheight=1)  # make label l to fit the parent window always
 
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
-    photobooth = ConnectPhotobooth(args.photobooth_ssid, args.photobooth_url, args.photobooth_image_hash)
-    printer = PrinterCollage(args.printer_name)
+    photobooth = ConnectPhotobooth(args['photobooth_ssid'], args['photobooth_url'], args['photobooth_image_hash'])
+    printer = PrinterCollage(args['printer_name'])
     check_and_redraw_display()
     window.mainloop()
