@@ -56,24 +56,20 @@ def open_settings_file():
 
 def validating_args():
     # TODO: Add proper handling of height > width
+    e = ""
     if args['collage_width'] < args['collage_height']:
         e = "Error: Collage target width must be smaller or equal than collage height."
-        logging.error(e)
-        raise Exception(e)
     if args['collage_margin'] >= args['collage_height']:
         e = "Error: Collage margin must be smaller than collage height."
-        logging.error(e)
-        raise Exception(e)
     if args['collage_margin'] >= args['collage_width']:
         e = "Error: Collage margin must be smaller than collage width."
-        logging.error(e)
-        raise Exception(e)
     if args['collage_add_margin_bottom'] >= args['collage_height']:
         e = "Error: Collage additional margin bottom must be smaller than collage height."
-        logging.error(e)
-        raise Exception(e)
     if args['collage_add_margin_bottom'] + args['collage_margin'] >= args['collage_height']:
         e = "Error: Collage margin plus additional margin bottom must be smaller than collage height."
+    if type(args['printer_queue']) is not bool:
+        e = f"Error: Entry 'printer_queue' must be 'true' or 'false', not {args['printer_queue']}"
+    if e:
         logging.error(e)
         raise Exception(e)
 
@@ -97,6 +93,13 @@ def check_and_redraw_display():
 
     # Popup to show printing process for a few seconds
     def open_popup():
+        def _close_popup_after():
+            if not print_job_checker(args['printer_name']) or args['printer_queue']:
+                top.destroy()
+            else:
+                logging.info("Printer is still printing an image...")
+                window.after(2000, _close_popup_after)
+
         global img_printer
         img_printer = Image.open(resource_path(os.path.join("images", "print.jpg")))
         img_printer = ImageOps.fit(img_printer, (800, 600))
@@ -112,15 +115,13 @@ def check_and_redraw_display():
         top.overrideredirect(True)  # no window manager decorations
         Label(top, text="Wird gedruckt...", font=('Helvetica 26 bold')).pack(pady=10)
         Label(top, image=img_printer).pack(pady=20)
-        def close_after_2s():
-            if not print_job_checker(args['printer_name']):
-                top.destroy()
-            else:
-                window.after(2000, close_after_2s)
-        window.after(2000, close_after_2s)
+        window.after(2000, _close_popup_after)
         window.update()
 
     def button_print_collage_2x2_clicked():
+        def _enable_button_2x2_after():
+            button_print_collage_2x2["state"] = "normal"
+
         logging.info("Button print collage 2x2 clicked")
         button_print_collage_2x2["state"] = "disable"
         if not print_job_checker(args['printer_name']):
@@ -128,11 +129,12 @@ def check_and_redraw_display():
             printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         else:
             logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
-        def enable_button_2x2_5s():
-            button_print_collage_2x2["state"] = "normal"
-        window.after(5000, enable_button_2x2_5s)
+        window.after(5000, _enable_button_2x2_after)
 
     def button_print_collage_1x1_clicked():
+        def _enable_button_1x1_after():
+            button_print_collage_1x1["state"] = "normal"
+
         logging.info("Button print collage 1x1 clicked")
         button_print_collage_1x1["state"] = "disable"
         if not print_job_checker(args['printer_name']):
@@ -140,9 +142,7 @@ def check_and_redraw_display():
             printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         else:
             logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
-        def enable_button_1x1_5s():
-            button_print_collage_1x1["state"] = "normal"
-        window.after(5000, enable_button_1x1_5s)
+        window.after(5000, _enable_button_1x1_after)
 
     if update_picture_list():
         # Create new 1x1 collage picture
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.5 ============================")
+    logging.info("============================ V1.6 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()

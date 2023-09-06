@@ -30,6 +30,8 @@ def parse_args():
                         help="Factor to enhance contrast of collage picture (default: %(default)s)")
     parser.add_argument("-pn", "--printer-name", type=str, default="Microsoft Print to PDF",
                         help="Name of the printer which should be used to print the collage picture (default: %(default)s)")
+    parser.add_argument("-pq", "--printer-queue", type=bool, default="False",
+                        help="Allow a printer queue or wait until a picture has been fully printed by printer (default: %(default)s)")
     parser.add_argument("-pl", "--list-printer", action="store_true",
                         help="Get the name of all available printers to use with --printer-name.")
 

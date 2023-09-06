@@ -37,15 +37,18 @@ class Collage:
         return os.path.join(base_path, relative_path)
 
     def _open_or_create_background_image(self):
-        if os.path.isfile(self.background_path):
-            self.background = Image.open(self.background_path)
-            bg_width, bg_height = self.background.size
-            if bg_width != self.width or bg_height != self.height:
-                logging.info(f"Provided Background size does not fit to target size. Will resize background image for you \r\n"
-                             f"Background size: {bg_width} x {bg_height}, target size: {self.width} x {self.height}")
-                self.background = ImageOps.fit(self.background, (self.width, self.height))
+        if self.background_path is not None:
+            if os.path.isfile(self.background_path):
+                self.background = Image.open(self.background_path)
+                bg_width, bg_height = self.background.size
+                if bg_width != self.width or bg_height != self.height:
+                    logging.info(f"Provided Background size does not fit to target size. Will resize background image for you \r\n"
+                                 f"Background size: {bg_width} x {bg_height}, target size: {self.width} x {self.height}")
+                    self.background = ImageOps.fit(self.background, (self.width, self.height))
+            else:
+                logging.warning(f"Could not find Background image {self.background_path}. Will create a white background for you")
+                self.background = Image.new("RGB", (self.width, self.height), "white")
         else:
-            logging.warning(f"Could not find Background image {self.background_path}. Will create a white background for you")
             self.background = Image.new("RGB", (self.width, self.height), "white")
 
     def _create_collage_list(self, amount, width, height):
