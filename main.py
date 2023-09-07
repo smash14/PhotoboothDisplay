@@ -124,7 +124,7 @@ def check_and_redraw_display():
 
         logging.info("Button print collage 2x2 clicked")
         button_print_collage_2x2["state"] = "disable"
-        if not print_job_checker(args['printer_name']):
+        if not print_job_checker(args['printer_name']) or args['printer_queue']:
             open_popup()
             printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         else:
@@ -137,7 +137,7 @@ def check_and_redraw_display():
 
         logging.info("Button print collage 1x1 clicked")
         button_print_collage_1x1["state"] = "disable"
-        if not print_job_checker(args['printer_name']):
+        if not print_job_checker(args['printer_name']) or args['printer_queue']:
             open_popup()
             printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         else:
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.6.1 ============================")
+    logging.info("============================ V1.6.2 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()
