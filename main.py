@@ -211,7 +211,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.6 ============================")
+    logging.info("============================ V1.6.1 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()
