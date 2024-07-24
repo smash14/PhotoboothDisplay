@@ -16,6 +16,8 @@ def parse_args():
                         help="URL of txt file which provides the md5 hash of the latest image (default: %(default)s)")
     parser.add_argument("-cbg", "--collage-background", type=str, default="background.jpg",
                         help="Path to background image of collage picture (default: %(default)s)")
+    parser.add_argument("-cfg", "--collage-foreground", type=str, default=None,
+                        help="Path to foreground image of collage picture (default: %(default)s)")
     parser.add_argument("-cw", "--collage-width", type=int, default=1800,
                         help="Width of final collage picture, should match printer paper (default: %(default)s)")
     parser.add_argument("-ch", "--collage-height", type=int, default=1200,

@@ -148,14 +148,16 @@ def check_and_redraw_display():
         # Create new 1x1 collage picture
         collage_1x1 = Collage(picture_list, args['collage_background'], args['collage_width'], args['collage_height'],
                               args['collage_margin'], args['collage_add_margin_bottom'],
-                              args['collage_enhance_brightness'], args['collage_enhance_contrast'])
+                              args['collage_enhance_brightness'], args['collage_enhance_contrast'],
+                              args['collage_foreground'])
         collage_1x1.create_collage_1x1()
         collage_1x1.save_collage(resource_path(os.path.join("images", "_collage1x1.jpg")))
 
         # Create new 2x2 collage picture
         collage_2x2 = Collage(picture_list, args['collage_background'], args['collage_width'], args['collage_height'],
                               args['collage_margin'], args['collage_add_margin_bottom'],
-                              args['collage_enhance_brightness'], args['collage_enhance_contrast'])
+                              args['collage_enhance_brightness'], args['collage_enhance_contrast'],
+                              args['collage_foreground'])
         collage_2x2.create_collage_2x2()
         collage_2x2.save_collage(resource_path(os.path.join("images", "_collage2x2.jpg")))
 
@@ -168,14 +170,14 @@ def check_and_redraw_display():
         button_height = int(screen_height / 10)
 
         # Create an object of tkinter ImageTk for Collage 2x2
-        image_collage_2x2 = Image.open(resource_path(os.path.join("images", "_collage2x2.jpg")))
+        image_collage_2x2 = Image.open(resource_path(os.path.join("images", "_collage2x2.png")))
         wpercent = (picture_width / float(image_collage_2x2.size[0]))
         hsize = int((float(image_collage_2x2.size[1]) * float(wpercent)))
         image_collage_2x2 = image_collage_2x2.resize((picture_width, hsize), Image.LANCZOS)
         image_collage_2x2 = ImageTk.PhotoImage(image_collage_2x2)
 
         # Create an object of tkinter ImageTk for Collage 1x1
-        image_collage_single = Image.open(resource_path(os.path.join("images", "_collage1x1.jpg")))
+        image_collage_single = Image.open(resource_path(os.path.join("images", "_collage1x1.png")))
         wpercent = (picture_width / float(image_collage_single.size[0]))
         hsize = int((float(image_collage_single.size[1]) * float(wpercent)))
         image_collage_single = image_collage_single.resize((picture_width, hsize), Image.LANCZOS)
@@ -211,7 +213,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.6.2 ============================")
+    logging.info("============================ V1.7.0 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()
