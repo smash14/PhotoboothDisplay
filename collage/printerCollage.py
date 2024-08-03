@@ -45,7 +45,11 @@ class PrinterCollage:
 
     @staticmethod
     def get_connected_printer():
-        local_printer = win32print.EnumPrinters(2)
+        try:
+            local_printer = win32print.EnumPrinters(2)
+        except Exception as e:
+            logging.error(f"Error while enumerating printers: {e}")
+            raise
         return local_printer
 
     def _set_printer(self):
