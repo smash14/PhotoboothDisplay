@@ -170,14 +170,14 @@ def check_and_redraw_display():
         button_height = int(screen_height / 10)
 
         # Create an object of tkinter ImageTk for Collage 2x2
-        image_collage_2x2 = Image.open(resource_path(os.path.join("images", "_collage2x2.png")))
+        image_collage_2x2 = Image.open(resource_path(os.path.join("images", "_collage2x2.jpg")))
         wpercent = (picture_width / float(image_collage_2x2.size[0]))
         hsize = int((float(image_collage_2x2.size[1]) * float(wpercent)))
         image_collage_2x2 = image_collage_2x2.resize((picture_width, hsize), Image.LANCZOS)
         image_collage_2x2 = ImageTk.PhotoImage(image_collage_2x2)
 
         # Create an object of tkinter ImageTk for Collage 1x1
-        image_collage_single = Image.open(resource_path(os.path.join("images", "_collage1x1.png")))
+        image_collage_single = Image.open(resource_path(os.path.join("images", "_collage1x1.jpg")))
         wpercent = (picture_width / float(image_collage_single.size[0]))
         hsize = int((float(image_collage_single.size[1]) * float(wpercent)))
         image_collage_single = image_collage_single.resize((picture_width, hsize), Image.LANCZOS)
@@ -213,7 +213,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.7.0 ============================")
+    logging.info("============================ V1.7.1 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()
