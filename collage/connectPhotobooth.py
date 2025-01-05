@@ -6,6 +6,7 @@ import shutil
 import time
 import hashlib
 import logging
+from utils import is_windows
 
 class ConnectPhotobooth:
     """
@@ -60,16 +61,20 @@ class ConnectPhotobooth:
         if self.ssid == "localhost":
             return True
         # check if network is in list of known networks
-        networks = subprocess.check_output(['netsh', 'WLAN', 'show', 'profiles'])
-        networks = networks.decode('utf-8', 'ignore')
-        if self.ssid not in networks:
-            logging.error(f"Error, {self.ssid} is not a known WiFi name. Please make the initial connection to the"
-                          f" WiFi network using Windows")
-            return False
+        if is_windows():
+            networks = subprocess.check_output(['netsh', 'WLAN', 'show', 'profiles'])
+            networks = networks.decode('utf-8', 'ignore')
+            if self.ssid not in networks:
+                logging.error(f"Error, {self.ssid} is not a known WiFi name. Please make the initial connection to the"
+                              f" WiFi network using Windows")
+                return False
         count = 0
         while count < timeout:
-            wifi = subprocess.check_output(['netsh', 'WLAN', 'show', 'interfaces'])
-            data = wifi.decode('utf-8', 'ignore')
+            if is_windows():
+                wifi = subprocess.check_output(['netsh', 'WLAN', 'show', 'interfaces'])
+                data = wifi.decode('utf-8', 'ignore')
+            else:
+                data = subprocess.run(["iwgetid"], stdout=subprocess.PIPE).stdout.decode('utf-8')
             if self.ssid in data:
                 logging.info(f"Connection to WLAN {self.ssid} established on {count+1} attempt!")
                 self.connection_established = True
