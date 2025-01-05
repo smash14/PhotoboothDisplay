@@ -4,7 +4,9 @@ Customizable Collage Maker for any kind of Photobooth.
 Regularly checks for new jpg files at a given URL and automatically creates two collage images which are displayed on a fullscreen window. right side of the screen shows the latest single image and left side of the screen shows the latest 4 pictures in a 2 by 2 grid.
 Below each picture is a print button located, which directly sends the collage picture to a defined printer.
 
-Works with Windows only.
+Tested on Windows (x68) and Linux (ARM - Raspberry Pi) with a Canon Selphy CP1500.
+
+Supports borderless printing.
 
 ## Feature overview
 ![Screenshot 2022-04-27 175241](https://github.com/smash14/PhotoboothDisplay/assets/36343912/29ccfbbd-1c99-4518-b420-c056f1103d71)
@@ -43,19 +45,37 @@ If you run the main file the first time, a settings.json file will be generated 
 | -pn       | Microsoft Print to PDF                | Name of the printer which should be used to print the collage picture           | Use parameter -pl to receive a list of all available printers and their names          |
 | -pq       | False                                 | Allow a printer queue or wait until a picture has been fully printed by printer |                                                                                        |
 
-## Restart Printer queue
+## Windows specific settings
+
+### Restart Printer queue
 Sometimes, the Windows printer queue seems to get stucked. In that case it may be useful to automatically stop and restart the printer spool:
 
-### Set Access Rights for Printer Spooler
+#### Set Access Rights for Printer Spooler
 Run the following command in a command shell to allow non-admin users to stop and start the printer spooler
 ```
 sc sdset Spooler "D:AR(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA) (A;;LCRPWP;;;AU)(A;;CCLCSWLOCRRC;;;IU)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;SY) S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 ```
 
-### Restart Printer Spooler
+#### Restart Printer Spooler
 Run this code as a batch script to restart the printer spooler:
 ```
 net stop spooler
 del /Q /F /S "%windir%\System32\spool\PRINTERS\*.*"
 net start spooler
+```
+
+## Raspberry Pi specific settings
+
+In order to use the printing functionality, a CUPS configured printer is needed.
+
+### Add CUPS support for Canon SELPHY CP1500
+The Canon Selphy CP15000 may not be supported by the current Raspbian release. Follow this guide to compile latest Gutenprint:
+https://www.peachyphotos.com/blog/stories/building-modern-gutenprint/
+
+After that, you will be able to add the printer using the CUPS Web interface: ```https://<hostname>:631/admin/```
+
+### Enable borderless printing for Canon SELPHY CP1500
+Achieving borderless printing on the Canon SELPHY CP1500 might be a bit tricky. I was able to use borderless printing using the "postcard" photos (100x148mm) and the following shell command:
+```
+lp -d Canon_SELPHY_CP1500 -o media=Postcard,StpiShrinkOutput=Expand,StpBorderless=True PATH_TO_IMAGE
 ```
