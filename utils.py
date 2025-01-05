@@ -12,3 +12,6 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+def is_windows():
+    """ Returns true if operating system is win32 type"""
+    return sys.platform.startswith('win')

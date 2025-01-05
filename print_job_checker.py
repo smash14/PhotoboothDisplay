@@ -1,7 +1,16 @@
-import win32print
-
+import subprocess
+import logging
+from utils import is_windows
+if is_windows():
+    import win32print
 
 def print_job_checker(printer_name=None):
+    if is_windows():
+        return print_job_checker_windows(printer_name)    
+    else:
+        return print_job_checker_linux(printer_name)    
+
+def print_job_checker_windows(printer_name):
     """
     Returns True if there is still a print job in queue.
     If a printer name is specified, all other printer queues are skipped.
@@ -27,9 +36,32 @@ def print_job_checker(printer_name=None):
     else:
         return False
 
+def print_job_checker_linux(printer_name):
+    """
+    Returns True if there is still a print job in queue.
+    If a printer name is specified, all other printer queues are skipped.
+    """
+    if printer_name:
+        print_queue_cmd = ['lpstat', '-o', printer_name]
+    else: 
+        print_queue_cmd = ['lpstat', '-o']
+    
+    result = subprocess.run(print_queue_cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
+
+    if "invalid" in result:
+        logging.error(f"Given printer name is invalid or other error: {result}")
+    
+    if result == "":
+        return False
+    
+    print(f"print queue not empty: {result}")
+    return True
+
+
+
 
 if __name__ == "__main__":
-    if print_job_checker("Canon SELPHY CP1500"):
+    if print_job_checker("Canon_SELPHY_CP1500"):
         print("Still something in printer queue")
     else:
         print("Nothing in queue")

@@ -1,6 +1,6 @@
 Pillow==9.5.0
-pywin32
-win32printing
+pywin32;platform_system=="Windows"
+win32printing;platform_system=="Windows"
 pynput~=1.7.6
 requests~=2.31.0
 keyboard~=0.13.5

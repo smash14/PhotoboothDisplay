@@ -3,16 +3,20 @@ import sys
 import json
 import tkinter.font
 from tkinter import *
+import logging
 from PIL import Image, ImageTk, ImageOps
-
+from utils import resource_path, is_windows
 import generate_settings
 from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
-from collage.printerCollage import PrinterCollage
-from utils import resource_path
 from print_job_checker import print_job_checker
 from generate_settings import generate_settings_main
-import logging
+
+if is_windows():
+    from collage.printerCollage import PrinterCollage
+else:
+    from collage.printerCollageLinux import PrinterCollageLinux
+
 
 # Global picture list with references to all photobooth pictures
 picture_list = []
@@ -75,11 +79,20 @@ def validating_args():
 
 
 def list_printers():
-    printer_list = PrinterCollage()
-    local_printers = printer_list.get_connected_printer()
     logging.info("You may use one of the following printer names:")
-    for local_printer in local_printers:
-        logging.info(local_printer[2])
+    if is_windows():
+        printer_list = PrinterCollage()
+    else:
+        printer_list = PrinterCollageLinux()
+    
+    local_printers = printer_list.get_connected_printer()
+
+    if is_windows():    
+        for local_printer in local_printers:
+            logging.info(local_printer[2])
+    else:
+        logging.info(local_printers)
+
     logging.info("---------------------------------")
 
 
@@ -233,6 +246,9 @@ if __name__ == '__main__':
     # For testing purposes, a XAMPP instance can be used to simulate a connection to a Photobox
     # Use "createPicture.exe" located in the bin folder to create new pictures.
     photobooth = ConnectPhotobooth(args['photobooth_ssid'], args['photobooth_url'], args['photobooth_image_hash'])
-    printer = PrinterCollage(args['printer_name'])
+    if is_windows():
+        printer = PrinterCollage(args['printer_name'])
+    else:
+        printer = PrinterCollageLinux(args['printer_name'])
     check_and_redraw_display()
     window.mainloop()
