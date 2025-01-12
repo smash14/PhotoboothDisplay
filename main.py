@@ -5,7 +5,7 @@ import tkinter.font
 from tkinter import *
 import logging
 from PIL import Image, ImageTk, ImageOps
-from utils import resource_path, is_windows
+from utils import resource_path, is_windows, cleanup_printer_queue
 import generate_settings
 from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
@@ -73,6 +73,8 @@ def validating_args():
         e = "Error: Collage margin plus additional margin bottom must be smaller than collage height."
     if type(args['printer_queue']) is not bool:
         e = f"Error: Entry 'printer_queue' must be 'true' or 'false', not {args['printer_queue']}"
+    if not 'print_media_type' in args.keys():
+        e = f"Error: Entry 'print_media_type' must be available in this version"
     if e:
         logging.error(e)
         raise Exception(e)
@@ -226,12 +228,13 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V1.7.2 ============================")
+    logging.info("============================ V2.0.0 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()
     validating_args()
     list_printers()
+    cleanup_printer_queue()
 
     window = Tk()
     window.attributes("-fullscreen", True)
@@ -249,6 +252,6 @@ if __name__ == '__main__':
     if is_windows():
         printer = PrinterCollage(args['printer_name'])
     else:
-        printer = PrinterCollageLinux(args['printer_name'])
+        printer = PrinterCollageLinux(args['printer_name'], args['print_media_type'], print_borderless=True )
     check_and_redraw_display()
     window.mainloop()

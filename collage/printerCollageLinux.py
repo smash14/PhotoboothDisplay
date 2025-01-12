@@ -4,9 +4,10 @@ import subprocess
 import logging
 
 class PrinterCollageLinux:
-    def __init__(self, printer_name="default", print_borderless=True):
+    def __init__(self, printer_name="default", print_media_type="postcard", print_borderless=True):
         self.printer_name = printer_name
         self.print_borderless = print_borderless
+        self.print_media_type = print_media_type
 
         self.selected_printer = ""
         if not self._set_printer():
@@ -53,7 +54,10 @@ class PrinterCollageLinux:
         # Start the print job using CUPS
         #  the printer device at the scaled size.
         #
-        print_command = ["lp", '-d', self.printer_name, '-o', 'media=Postcard,StpiShrinkOutput=Expand,StpBorderless=True', path_to_file]
+        print_media = self.print_media_type + ",StpiShrinkOutput=Expand"
+        if self.print_borderless:
+            print_media = print_media + ",StpBorderless=True"
+        print_command = ["lp", '-d', self.printer_name, '-o', print_media, path_to_file]
 
         try:
             result = subprocess.run(print_command, stdout=subprocess.PIPE).stdout.decode('utf-8')

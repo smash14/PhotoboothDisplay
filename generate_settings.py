@@ -36,6 +36,8 @@ def parse_args():
                         help="Allow a printer queue or wait until a picture has been fully printed by printer (default: %(default)s)")
     parser.add_argument("-pl", "--list-printer", action="store_true",
                         help="Get the name of all available printers to use with --printer-name.")
+    parser.add_argument("-pmt", "--print_media_type", type=str, default="postcard",
+                        help="Set type of paper which is inserted in your printer (default: %(default)s)")
 
     return parser.parse_args()
 
