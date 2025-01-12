@@ -9,7 +9,12 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('images/*', 'images')],
-    hiddenimports=['win32timezone'],
+    hiddenimports=[
+        'win32timezone',
+        'tkinter',
+        'tkinter.filedialog',
+        'PIL._tkinter_finder'
+        ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
