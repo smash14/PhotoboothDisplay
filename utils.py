@@ -40,6 +40,28 @@ def cleanup_printer_queue():
         else:
             logging.info(f"No pending print jobs left {result}")
         return True
-    
+
+def get_gui_default_settings():
+    gui_settings = {
+        "main_screen": {
+            "padding_x": 100,
+            "padding_y": 50
+        },
+        "print_screen": {
+            "width": 800,
+            "height": 600,
+            "text": "wird gedruckt...",
+            "font": "Helvetica 26 bold",
+            "font_size": 26
+        },
+        "print_button": {
+            "height": 100,
+            "text": "Bild ausdrucken",
+            "font": "Bahnschrift SemiBold SemiCondensed",
+            "font_size": 24
+        }
+    }
+    return gui_settings
+
 if __name__ == '__main__':
     cleanup_printer_queue()
