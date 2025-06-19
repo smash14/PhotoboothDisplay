@@ -51,6 +51,7 @@ def get_gui_default_settings():
             "width": 800,
             "height": 600,
             "text": "wird gedruckt...",
+            "error_text": "Kein Papier",
             "font": "Helvetica 26 bold",
             "font_size": 26
         },

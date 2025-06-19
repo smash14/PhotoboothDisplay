@@ -9,7 +9,7 @@ from utils import resource_path, is_windows, cleanup_printer_queue, get_gui_defa
 import generate_settings
 from collage.collage import Collage
 from collage.connectPhotobooth import ConnectPhotobooth
-from print_job_checker import print_job_checker
+from print_job_checker import print_job_checker, enable_printer, is_printer_out_of_paper
 from generate_settings import generate_settings_main
 
 if is_windows():
@@ -128,18 +128,26 @@ def check_and_redraw_display():
     global pixel
 
     # Popup to show printing process for a few seconds
-    def open_popup():
+    def open_popup(show_no_paper_text=False, force_close_popup_after_two_seconds=False):
         def _close_popup_after():
-            if not print_job_checker(args['printer_name']) or args['printer_queue']:
+            if force_close_popup_after_two_seconds:
                 top.destroy()
             else:
-                logging.info("Printer is still printing an image...")
-                window.after(2000, _close_popup_after)
+                if is_printer_out_of_paper(args['printer_name']):
+                    top.destroy()  # in case we are out of paper, close popup to later show error message
+                if not print_job_checker(args['printer_name']) or args['printer_queue']:
+                    top.destroy()
+                else:
+                    logging.info("Printer is still printing an image...")
+                    window.after(2000, _close_popup_after)
 
         global img_printer
         width = gui_settings['print_screen']['width']
         height = gui_settings['print_screen']['height']
-        text = gui_settings['print_screen']['text']
+        if show_no_paper_text:
+            text = gui_settings['print_screen']['error_text']
+        else:
+            text = gui_settings['print_screen']['text']
         font = (gui_settings['print_screen']['font'], gui_settings['print_screen']['font_size'])
         img_printer = Image.open(resource_path(os.path.join("images", "print.jpg")))
         img_printer = ImageOps.fit(img_printer, (width, height))
@@ -163,8 +171,11 @@ def check_and_redraw_display():
         logging.info("Button print collage 2x2 clicked")
         button_print_collage_2x2["state"] = "disable"
         if not print_job_checker(args['printer_name']) or args['printer_queue']:
-            open_popup()
-            printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
+            if is_printer_out_of_paper(args['printer_name']):
+                open_popup(show_no_paper_text=True, force_close_popup_after_two_seconds=True)
+            else:
+                open_popup()
+                printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         else:
             logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
         window.after(5000, _enable_button_2x2_after)
@@ -176,8 +187,11 @@ def check_and_redraw_display():
         logging.info("Button print collage 1x1 clicked")
         button_print_collage_1x1["state"] = "disable"
         if not print_job_checker(args['printer_name']) or args['printer_queue']:
-            open_popup()
-            printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
+            if is_printer_out_of_paper(args['printer_name']):
+                open_popup(show_no_paper_text=True, force_close_popup_after_two_seconds=True)
+            else:
+                open_popup()
+                printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         else:
             logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
         window.after(5000, _enable_button_1x1_after)
@@ -253,7 +267,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V2.1.0 ============================")
+    logging.info("============================ V2.2.0 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()
@@ -261,6 +275,7 @@ if __name__ == '__main__':
     open_and_validate_gui_settings()
     list_printers()
     cleanup_printer_queue()
+    enable_printer(args['printer_name'])
 
     window = Tk()
     window.attributes("-fullscreen", True)

@@ -5,10 +5,68 @@ if is_windows():
     import win32print
 
 def print_job_checker(printer_name=None):
+    """
+    Returns True if there is still a print job in queue.
+    If a printer name is specified, all other printer queues are skipped.
+    """
     if is_windows():
         return print_job_checker_windows(printer_name)    
     else:
-        return print_job_checker_linux(printer_name)    
+        return print_job_checker_linux(printer_name)
+
+
+def is_printer_out_of_paper(printer_name=None):
+    if is_windows():
+        return False  # TODO implement
+    else:
+        return is_printer_out_of_paper_linux(printer_name)
+
+
+def enable_printer(printer_name):
+    if is_windows():
+        return True  # TODO implement
+    else:
+        return enable_printer_linux(printer_name)
+
+
+def is_printer_out_of_paper_linux(printer_name):
+    if printer_name:
+        printer_status_cmd = ['lpstat', '-p', printer_name]  # get status of printer
+    else:
+        printer_status_cmd = ['lpstat', '-p']
+
+    result = subprocess.run(printer_status_cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
+
+    if "invalid" in result:
+        logging.error(f"Given printer name is invalid or other error: {result}")
+
+    if "No Paper" in result:
+        return True
+
+    return False
+
+
+def enable_printer_linux(printer_name):
+    if printer_name is None:
+        logging.error(f"Printer cannot be enabled due to printer name is None")
+        return False
+
+    enable_printer_cmd = ['cupsenable', printer_name]
+
+    result = subprocess.run(enable_printer_cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
+
+    if "failed" in result:
+        logging.error(f"Given printer name {printer_name} is invalid or other error: {result}")
+        return False
+
+    if result == "":
+        return True
+
+    logging.error(f"Unhandled response while trying to enable printer {printer_name}: {result}")
+    return False
+
+
+
 
 def print_job_checker_windows(printer_name):
     """
