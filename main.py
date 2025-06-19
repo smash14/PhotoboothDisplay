@@ -135,6 +135,7 @@ def check_and_redraw_display():
             else:
                 if is_printer_out_of_paper(args['printer_name']):
                     top.destroy()  # in case we are out of paper, close popup to later show error message
+                    open_popup(show_no_paper_text=True, force_close_popup_after_two_seconds=True)
                 else:
                     if not print_job_checker(args['printer_name']) or args['printer_queue']:
                         top.destroy()
