@@ -36,12 +36,12 @@ def is_printer_out_of_paper_linux(printer_name):
         printer_status_cmd = ['lpstat', '-p']
 
     result = subprocess.run(printer_status_cmd, stdout=subprocess.PIPE).stdout.decode('utf-8')
-    logging.info(result)
 
     if "invalid" in result:
         logging.error(f"Given printer name is invalid or other error: {result}")
 
     if "error" in result:
+        logging.warning(f"printer has error any may be out of paper: {result}")
         return True
 
     return False
