@@ -40,7 +40,7 @@ def is_printer_out_of_paper_linux(printer_name):
     if "invalid" in result:
         logging.error(f"Given printer name is invalid or other error: {result}")
 
-    if "No Paper" in result:
+    if "error" in result:
         return True
 
     return False
