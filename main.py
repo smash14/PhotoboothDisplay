@@ -134,6 +134,8 @@ def check_and_redraw_display():
                 top.destroy()
             else:
                 if is_printer_out_of_paper(args['printer_name']):
+                    cleanup_printer_queue()  # It seems that there is no auto detection if printer was inserted
+                    enable_printer(args['printer_name'])
                     top.destroy()  # in case we are out of paper, close popup to later show error message
                     open_popup(show_no_paper_text=True, force_close_popup_after_two_seconds=True)
                 else:
