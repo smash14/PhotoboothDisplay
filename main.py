@@ -135,11 +135,12 @@ def check_and_redraw_display():
             else:
                 if is_printer_out_of_paper(args['printer_name']):
                     top.destroy()  # in case we are out of paper, close popup to later show error message
-                if not print_job_checker(args['printer_name']) or args['printer_queue']:
-                    top.destroy()
                 else:
-                    logging.info("Printer is still printing an image...")
-                    window.after(2000, _close_popup_after)
+                    if not print_job_checker(args['printer_name']) or args['printer_queue']:
+                        top.destroy()
+                    else:
+                        logging.info("Printer is still printing an image...")
+                        window.after(2000, _close_popup_after)
 
         global img_printer
         width = gui_settings['print_screen']['width']
