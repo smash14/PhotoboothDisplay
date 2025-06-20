@@ -134,8 +134,8 @@ def check_and_redraw_display():
                 top.destroy()
             else:
                 if is_printer_out_of_paper(args['printer_name']):
-                    cleanup_printer_queue()  # It seems that there is no auto detection if printer was inserted
-                    enable_printer(args['printer_name'])
+                    cleanup_printer_queue()  # It seems that there is no auto-detection if paper was inserted
+                    enable_printer(args['printer_name'])  # It seems that printer must be enabled again
                     top.destroy()  # in case we are out of paper, close popup to later show error message
                     open_popup(show_no_paper_text=True, force_close_popup_after_two_seconds=True)
                 else:
@@ -174,14 +174,11 @@ def check_and_redraw_display():
 
         logging.info("Button print collage 2x2 clicked")
         button_print_collage_2x2["state"] = "disable"
-        if is_printer_out_of_paper(args['printer_name']):
-            open_popup(show_no_paper_text=True, force_close_popup_after_two_seconds=True)
+        if not print_job_checker(args['printer_name']) or args['printer_queue']:
+            open_popup()
+            printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
         else:
-            if not print_job_checker(args['printer_name']) or args['printer_queue']:
-                open_popup()
-                printer.print_image(resource_path(os.path.join("images", "_collage2x2.jpg")))
-            else:
-                logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
+            logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
         window.after(5000, _enable_button_2x2_after)
 
     def button_print_collage_1x1_clicked():
@@ -190,14 +187,11 @@ def check_and_redraw_display():
 
         logging.info("Button print collage 1x1 clicked")
         button_print_collage_1x1["state"] = "disable"
-        if is_printer_out_of_paper(args['printer_name']):
-            open_popup(show_no_paper_text=True, force_close_popup_after_two_seconds=True)
+        if not print_job_checker(args['printer_name']) or args['printer_queue']:
+            open_popup()
+            printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
         else:
-            if not print_job_checker(args['printer_name']) or args['printer_queue']:
-                open_popup()
-                printer.print_image(resource_path(os.path.join("images", "_collage1x1.jpg")))
-            else:
-                logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
+            logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
         window.after(5000, _enable_button_1x1_after)
 
     if update_picture_list():
@@ -271,7 +265,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V2.2.1 ============================")
+    logging.info("============================ V2.2.5 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()
