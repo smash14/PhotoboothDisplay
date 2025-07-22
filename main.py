@@ -3,6 +3,7 @@ import sys
 import json
 import tkinter.font
 from tkinter import *
+from tkinter import messagebox
 import logging
 from PIL import Image, ImageTk, ImageOps
 from utils import resource_path, is_windows, cleanup_printer_queue, get_gui_default_settings
@@ -90,7 +91,7 @@ def open_and_validate_gui_settings():
         with open('gui_settings.json', 'w') as outfile:
             default_gui_settings = get_gui_default_settings()
             json.dump(default_gui_settings, outfile, indent=4)
-    with open('gui_settings.json') as gui_settings_file:
+    with open('gui_settings.json', encoding='utf-8') as gui_settings_file:
         file_contents = gui_settings_file.read()
         logging.info("Found gui_settings.json file")
     try:
@@ -181,6 +182,15 @@ def check_and_redraw_display():
             logging.warning("User requested printout, but there is still a photo in printer queue. Printout aborted")
         window.after(5000, _enable_button_2x2_after)
 
+    def shutdown_system():
+        response = messagebox.askquestion(gui_settings['shutdown_message_box']['title'],
+                                          gui_settings['shutdown_message_box']['message'])
+        if response == "yes":
+            if is_windows():
+                os.system("shutdown /s /t 1")
+            else:
+                os.system("sudo shutdown now")
+
     def button_print_collage_1x1_clicked():
         def _enable_button_1x1_after():
             button_print_collage_1x1["state"] = "normal"
@@ -256,7 +266,22 @@ def check_and_redraw_display():
                                           font=button_font, command=button_print_collage_1x1_clicked)
         button_print_collage_1x1.grid(row=1, column=1)
 
-    # check for new pictures every 2 seconds
+        # On Off Icon
+        on_off_icon = Image.open(resource_path(os.path.join("images", "on_off_icon.png")))
+        on_off_icon = on_off_icon.resize((gui_settings['shutdown_message_box']['size'],
+                                          gui_settings['shutdown_message_box']['size']), Image.LANCZOS)
+        on_off_icon = ImageTk.PhotoImage(on_off_icon)
+
+        global settings_icon_global
+        settings_icon_global = on_off_icon
+
+        settings_button = Button(window, image=settings_icon_global, borderwidth=0, highlightthickness=0,
+                                 bg='#FF8C00', command=shutdown_system)
+        settings_button.place(relx=gui_settings['shutdown_message_box']['placement_relx'],
+                              rely=gui_settings['shutdown_message_box']['placement_rely'],
+                              anchor="sw")
+
+        # check for new pictures every 2 seconds
     window.after(args['photobooth_update_interval'], check_and_redraw_display)
     window.update()
 
@@ -265,7 +290,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='logfile.log', filemode='a', level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("============================ V2.2.5 ============================")
+    logging.info("============================ V2.3.0 ============================")
     logging.info("Start Main Application")
 
     open_settings_file()

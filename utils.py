@@ -60,6 +60,13 @@ def get_gui_default_settings():
             "text": "Bild ausdrucken",
             "font": "Bahnschrift SemiBold SemiCondensed",
             "font_size": 24
+        },
+        "shutdown_message_box": {
+            "title": "Herunterfahren",
+            "message": "Möchten Sie den Drucker wirklich herunterfahren?",
+            "size": 50,
+            "placement_relx": 0.02,
+            "placement_rely": 0.9
         }
     }
     return gui_settings
